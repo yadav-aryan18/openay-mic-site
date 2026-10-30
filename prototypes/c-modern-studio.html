@@ -121,6 +121,7 @@
   .bcard.slim { grid-column: span 2; }
   .bcard::before {  /* cursor spotlight (Aceternity: Card Spotlight) */
     content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .35s;
+    pointer-events: none;
     background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgba(255,180,84,.09), transparent 65%);
   }
   .bcard:hover::before { opacity: 1; }
@@ -194,6 +195,7 @@
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude;
     opacity: 0; transition: opacity .3s;
+    pointer-events: none;
   }
   @property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
   .dl-card:hover::before { opacity: 1; animation: spin-ang 3.2s linear infinite; }

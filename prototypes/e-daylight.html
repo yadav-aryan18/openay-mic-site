@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenAY Mic — your phone as a microphone, free and open source</title>
+<meta name="description" content="Free, open-source app that turns an Android phone into a microphone for your Windows or Linux computer. Works with Zoom, OBS, Discord, Audacity — over Wi-Fi or a cable.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23F6F1E7'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23C47B1A'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F1E7; --card: #FCF9F2; --ink: #1D1912; --line: #E2D8C6;
+    --dim: #6E6354; --accent: #B4690E; --amber: #FFB454;
+    --radius: 18px; --sans: "Inter", system-ui, sans-serif; --disp: "Chakra Petch", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); color: var(--ink); font: 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--amber); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+  .eyebrow { font-family: var(--disp); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+
+  .topbar { position: sticky; top: 0; z-index: 50; background: rgba(246,241,231,.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .topbar .wrap { display: flex; align-items: center; gap: 24px; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--disp); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-size: 14px; }
+  .lamp { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(255,180,84,.35); flex: none; }
+  .topbar nav { display: flex; gap: 22px; margin: 0 auto; font-size: 14px; color: var(--dim); }
+  .topbar nav a:hover { color: var(--ink); }
+  .top-dl { font-weight: 600; font-size: 13.5px; background: var(--ink); color: var(--paper); border-radius: 999px; padding: 9px 18px; transition: transform .06s, opacity .15s; }
+  .top-dl:hover { opacity: .88; }
+  @media (max-width: 700px) { .topbar nav { display: none; } }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; font-size: 15px; border-radius: 999px; padding: 14px 28px; border: 1px solid transparent; transition: transform .06s, opacity .15s, border-color .15s; }
+  .btn:active { transform: translateY(1px); }
+  .btn-ink { background: var(--ink); color: var(--paper); }
+  .btn-ink:hover { opacity: .9; }
+  .btn-ghost { border-color: var(--line); background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--card); }
+
+  .hero { padding: 92px 0 30px; text-align: center; }
+  .hero .chip { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 16px; font-size: 13px; color: var(--dim); margin-bottom: 26px; }
+  .hero .chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1 { font-family: var(--disp); font-weight: 700; font-size: clamp(2.3rem, 5.6vw, 4rem); line-height: 1.08; letter-spacing: -.01em; }
+  .u-amber { position: relative; white-space: nowrap; }
+  .u-amber::after { content: ""; position: absolute; left: 0; right: 0; bottom: .04em; height: .28em; background: var(--amber); opacity: .55; border-radius: 4px; z-index: -1; }
+  .hero .sub { margin: 22px auto 0; max-width: 58ch; color: var(--dim); font-size: clamp(1.02rem, 1.5vw, 1.16rem); }
+  .hero .sub strong { color: var(--ink); font-weight: 500; }
+  .hero-cta { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+  .trust { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 22px; margin-top: 24px; font-size: 13.5px; color: var(--dim); }
+  .trust span { display: inline-flex; align-items: center; gap: 7px; }
+  .trust svg { color: var(--accent); }
+
+  /* signal diagram — light take on The Chain */
+  .diagram {
+    margin: 54px auto 0; max-width: 760px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(29,25,18,.05), 0 14px 40px rgba(29,25,18,.07);
+    padding: clamp(22px, 4vw, 38px);
+  }
+  .diagram .d-title { font-family: var(--disp); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); text-align: center; margin-bottom: 20px; }
+  .dchain { display: flex; align-items: center; gap: 0; }
+  .dnode { flex: 1; text-align: center; display: grid; gap: 7px; justify-items: center; }
+  .dnode .d-dot { width: 52px; height: 52px; border-radius: 50%; background: var(--paper); border: 2px solid var(--accent); display: grid; place-items: center; box-shadow: 0 0 0 6px rgba(255,180,84,.22); }
+  .dnode .d-dot svg { color: var(--accent); }
+  .dnode .d-label { font-family: var(--disp); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+  .dnode .d-sub { font-size: 12px; color: var(--dim); }
+  .dline { flex: 1; height: 2px; background: var(--line); position: relative; margin: 0 6px; }
+  .dline::after { content: ""; position: absolute; left: 0; top: -1px; height: 4px; width: 34px; border-radius: 2px; background: var(--accent); animation: dtravel 2.6s ease-in-out infinite; }
+  @keyframes dtravel { 0% { left: -8%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 96%; opacity: 0; } }
+  .d-caption { text-align: center; font-size: 12.5px; color: var(--dim); margin-top: 18px; }
+
+  section.block { padding: 76px 0 8px; }
+  .sec-head { max-width: 620px; margin: 0 auto 42px; text-align: center; }
+  .sec-head h2 { font-family: var(--disp); font-weight: 700; font-size: clamp(1.55rem, 3vw, 2.1rem); margin-top: 12px; }
+  .sec-head p { color: var(--dim); margin-top: 10px; }
+
+  .apps { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 780px; margin: 0 auto; }
+  .apps span { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 9px 18px; font-size: 14px; color: var(--ink); box-shadow: 0 1px 2px rgba(29,25,18,.04); }
+
+  .feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .fcard { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 26px; box-shadow: 0 1px 2px rgba(29,25,18,.05), 0 10px 30px rgba(29,25,18,.06); transition: transform .18s ease, box-shadow .18s ease; }
+  .fcard:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(29,25,18,.06), 0 18px 44px rgba(29,25,18,.1); }
+  .fcard .ic { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,180,84,.28); color: var(--accent); display: grid; place-items: center; margin-bottom: 14px; }
+  .fcard h3 { font-size: 1.06rem; margin-bottom: 6px; }
+  .fcard p { font-size: 14.5px; color: var(--dim); }
+  @media (max-width: 800px) { .feat { grid-template-columns: 1fr; } }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .step { text-align: left; border-top: 2px solid var(--ink); padding-top: 16px; }
+  .step .n { font-family: var(--disp); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .step b { display: block; margin: 8px 0 4px; font-size: 15.5px; }
+  .step p { font-size: 14px; color: var(--dim); }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 880px) { .dl-grid { grid-template-columns: 1fr; } }
+  .dl-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 24px 24px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 1px 2px rgba(29,25,18,.05), 0 10px 30px rgba(29,25,18,.06); transition: transform .18s ease, box-shadow .18s ease; }
+  .dl-card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(29,25,18,.06), 0 18px 44px rgba(29,25,18,.1); }
+  .dl-card .os { display: flex; align-items: center; gap: 11px; margin-bottom: 6px; }
+  .dl-card .os .ic { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,180,84,.28); color: var(--accent); display: grid; place-items: center; }
+  .dl-card h3 { font-size: 1.05rem; }
+  .rec { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--paper); border-radius: 999px; padding: 3px 10px; margin-left: auto; }
+  .dl-card .file { font-size: 12.5px; color: var(--dim); word-break: break-all; }
+  .dl-card .meta { font-size: 13px; color: var(--dim); }
+  .dl-card .btn { margin-top: 16px; width: 100%; }
+  .dl-note { text-align: center; color: var(--dim); font-size: 13.5px; margin-top: 18px; }
+  .dl-note b { color: var(--ink); font-weight: 600; }
+
+  .rel { max-width: 720px; margin: 0 auto; display: grid; gap: 14px; }
+  .rel-item { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+  .rel-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .rel-head .v { font-weight: 600; }
+  .badge-latest { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: rgba(255,180,84,.3); border-radius: 999px; padding: 3px 10px; }
+  .rel-head time { font-size: 13px; color: var(--dim); margin-left: auto; }
+  .rel-item > p { color: var(--dim); font-size: 14px; margin-top: 8px; max-width: 62ch; }
+  .rel-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .rel-files a { font-size: 12.5px; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 13px; transition: border-color .15s; }
+  .rel-files a:hover { border-color: var(--accent); }
+  .rel-files a span { color: var(--dim); }
+
+  .faq { max-width: 720px; margin: 0 auto; }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq summary { cursor: pointer; list-style: none; padding: 17px 4px; display: flex; justify-content: space-between; gap: 16px; font-weight: 500; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .chev { color: var(--accent); transition: rotate .2s; }
+  .faq details[open] summary .chev { rotate: 45deg; }
+  .faq .a { padding: 0 4px 18px; color: var(--dim); font-size: 14.5px; max-width: 62ch; }
+  .faq .a b { color: var(--ink); font-weight: 500; }
+
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 34px 0 46px; }
+  .foot { display: flex; flex-wrap: wrap; gap: 14px 30px; align-items: center; }
+  .foot-note { font-size: 13px; color: var(--dim); }
+  .foot-links { margin-left: auto; display: flex; flex-wrap: wrap; gap: 20px; font-size: 13.5px; }
+  .foot-links a { color: var(--dim); } .foot-links a:hover { color: var(--ink); }
+
+  .reveal { opacity: 0; translate: 0 20px; transition: opacity .6s ease, translate .6s ease; }
+  .reveal.in { opacity: 1; translate: 0 0; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .dline::after, .fcard:hover, .dl-card:hover { animation: none; transform: none; }
+    .reveal { opacity: 1; translate: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#download">Download</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="top-dl" id="navDl" href="#download">Download</a>
+  </div>
+</div>
+
+<main id="top">
+  <section class="hero wrap">
+    <span class="chip"><i aria-hidden="true"></i>Free &amp; open source · no account needed</span>
+    <h1>Turn your phone into a microphone<br>for your <span class="u-amber">computer</span>.</h1>
+    <p class="sub">
+      OpenAY Mic sends your phone's audio to your Windows or Linux computer over
+      <strong>Wi-Fi or a USB cable</strong>. Zoom, OBS, Discord, Audacity — every app
+      simply sees a real microphone.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-ink" id="heroDl" href="#download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span id="heroDlLabel">Download</span>
+      </a>
+      <a class="btn btn-ghost" href="#how">How it works</a>
+    </div>
+    <p class="trust">
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No cloud</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No account</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No tracking</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Android, Windows &amp; Linux</span>
+    </p>
+
+    <div class="diagram reveal" role="img" aria-label="Diagram: audio flows from the phone, across the link, to the computer's apps">
+      <p class="d-title">The signal path</p>
+      <div class="dchain">
+        <div class="dnode">
+          <span class="d-dot" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span>
+          <span class="d-label">Your phone</span>
+          <span class="d-sub">captures the audio</span>
+        </div>
+        <div class="dline" aria-hidden="true"></div>
+        <div class="dnode">
+          <span class="d-dot" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></span>
+          <span class="d-label">The link</span>
+          <span class="d-sub">Wi-Fi or USB</span>
+        </div>
+        <div class="dline" aria-hidden="true"></div>
+        <div class="dnode">
+          <span class="d-dot" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+          <span class="d-label">Your computer</span>
+          <span class="d-sub">a real microphone</span>
+        </div>
+      </div>
+      <p class="d-caption">Signal pulses travel left to right — you can watch it live in the app.</p>
+    </div>
+  </section>
+
+  <section class="block wrap" id="features" aria-labelledby="h-feat">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Features</span>
+      <h2 id="h-feat">Everything you need. Nothing you don't.</h2>
+      <p>Install it, connect it, forget it's there.</p>
+    </div>
+    <div class="feat">
+      <div class="fcard reveal">
+        <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3>Works with every app</h3>
+        <p>Once connected, your phone appears as a normal microphone. Choose it in any app's settings — nothing else to configure.</p>
+      </div>
+      <div class="fcard reveal">
+        <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <h3>Feels instant</h3>
+        <p>Tuned until the delay disappears — your voice stays in sync with your lips on stream, in calls, and in takes.</p>
+      </div>
+      <div class="fcard reveal">
+        <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Private by design</h3>
+        <p>Audio travels only between your own devices on your own network. No cloud, no account, no analytics — ever.</p>
+      </div>
+      <div class="fcard reveal">
+        <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></div>
+        <h3>Wi-Fi or a cable</h3>
+        <p>Same Wi-Fi network for wireless freedom, or a USB cable when you want a connection that never hiccups.</p>
+      </div>
+      <div class="fcard reveal">
+        <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg></div>
+        <h3>Free. For real.</h3>
+        <p>Open source under the MIT license — every feature, every platform, no paywalls or "pro" tiers.</p>
+      </div>
+      <div class="fcard reveal">
+        <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <h3>Set up in minutes</h3>
+        <p>No root, no drivers, no admin rights. Install, run, connect — that's the whole story.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block wrap" id="how" aria-labelledby="h-how">
+    <div class="sec-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2 id="h-how">Three steps. About two minutes.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><span class="n">Step 1</span><b>Install the app on your phone</b><p>Download the app below and open it. Allow the microphone permission when asked.</p></div>
+      <div class="step reveal"><span class="n">Step 2</span><b>Run the receiver on your computer</b><p>Start OpenAY Mic on your Windows PC or Linux machine and leave it listening.</p></div>
+      <div class="step reveal"><span class="n">Step 3</span><b>Connect and go live</b><p>Use the same Wi-Fi network, or plug in a USB cable. Press the big button. Done.</p></div>
+    </div>
+  </section>
+
+  <section class="block wrap" id="download" aria-labelledby="h-dl">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Download</span>
+      <h2 id="h-dl">Get OpenAY Mic</h2>
+      <p>Free downloads, straight from the official build. Files save to your device — no sign-up, no installer bundles.</p>
+    </div>
+    <div class="dl-grid" id="dlCards"></div>
+    <p class="dl-note">Latest version <b id="dlVer">—</b> · updated <span id="dlDate">—</span> · downloads are delivered by GitHub Releases</p>
+  </section>
+
+  <section class="block wrap" aria-labelledby="h-new">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Release history</span>
+      <h2 id="h-new">What's new</h2>
+    </div>
+    <div class="rel" id="relList"></div>
+  </section>
+
+  <section class="block wrap" id="faq" aria-labelledby="h-faq">
+    <div class="sec-head reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 id="h-faq">Before you download</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>Is it really free? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a"><b>Yes.</b> Open source under the MIT license, and the downloads are free. No paid tier, no account, nothing metered.</div>
+      </details>
+      <details>
+        <summary>Do I need to "root" my phone or install drivers? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">No. Everything runs normally on both your phone and your computer — no special permissions beyond the microphone.</div>
+      </details>
+      <details>
+        <summary>Will my apps actually see it as a microphone? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a"><b>On Linux, yes — everywhere.</b> On Windows, you pair it once with a free "virtual audio cable" app (like VB-Cable) so other programs can select it — the same one-time setup streamers already use.</div>
+      </details>
+      <details>
+        <summary>Wi-Fi or cable — which should I use? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">Try Wi-Fi first — it's the most convenient. If your network is busy and you hear hiccups, a USB cable gives a rock-solid connection.</div>
+      </details>
+      <details>
+        <summary>Is my audio private? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">Your audio travels only between your phone and your computer on your own network. It never touches the internet, and the app collects nothing.</div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="brand"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</span>
+    <span class="foot-note">MIT © 2026 Aryan Yadav · built in the open</span>
+    <div class="foot-links">
+      <a href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">Source code</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/releases" target="_blank" rel="noopener">All releases</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/issues" target="_blank" rel="noopener">Report a problem</a>
+    </div>
+  </div>
+</footer>
+
+<script src="releases-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
+  function fmtDate(iso) { return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }); }
+
+  var data = window.OPENAY_SITE;
+  var latest = data.releases.filter(function (r) { return r.latest; })[0] || data.releases[0];
+  function asset(rel, key) {
+    for (var i = 0; i < rel.assets.length; i++) {
+      var n = rel.assets[i].name;
+      if (key === "android" && /android\.apk$/.test(n) && !/bluetooth/.test(n)) return rel.assets[i];
+      if (key === "windows" && /windows.*\.zip$/.test(n)) return rel.assets[i];
+      if (key === "linux" && /linux.*\.tar\.gz$/.test(n)) return rel.assets[i];
+    }
+    return null;
+  }
+
+  var uaPlat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  var platform = /android/i.test(navigator.userAgent) ? "android" : /win/i.test(uaPlat) ? "windows" : /linux/i.test(uaPlat) ? "linux" : "other";
+  var osNames = { android: "Android", windows: "Windows", linux: "Linux", other: "" };
+  var hero = $("heroDl"), heroLbl = $("heroDlLabel"), navDl = $("navDl");
+  var heroAsset = asset(latest, platform === "other" ? "android" : platform);
+  if (heroAsset && platform !== "other") {
+    hero.href = heroAsset.url; hero.setAttribute("download", ""); hero.setAttribute("rel", "noopener");
+    navDl.href = heroAsset.url; navDl.setAttribute("download", ""); navDl.setAttribute("rel", "noopener");
+    heroLbl.textContent = "Download for " + osNames[platform];
+  }
+
+  var micSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+  var cards = [
+    { key: "android", os: "Android", sub: "For your phone — this is the microphone", meta: "installs like a normal app" },
+    { key: "windows", os: "Windows", sub: "For your PC — this is the receiver", meta: "self-contained · no installer" },
+    { key: "linux",   os: "Linux",   sub: "For your machine — this is the receiver", meta: "self-contained · no installer" }
+  ];
+  $("dlCards").innerHTML = cards.map(function (c) {
+    var a = asset(latest, c.key);
+    if (!a) return "";
+    return '<div class="dl-card reveal">' +
+      '<div class="os"><span class="ic" aria-hidden="true">' + micSvg + "</span><h3>" + esc(c.os) + "</h3>" + (c.key === platform ? '<span class="rec">For you</span>' : "") + "</div>" +
+      '<p style="font-size:14px;color:var(--dim)">' + esc(c.sub) + "</p>" +
+      '<span class="file">' + esc(a.name) + "</span>" +
+      '<span class="meta">' + mb(a.size) + " · " + esc(c.meta) + "</span>" +
+      '<a class="btn btn-ink" href="' + esc(a.url) + '" download rel="noopener">Download for ' + esc(c.os) + "</a>" +
+      "</div>";
+  }).join("");
+  $("dlVer").textContent = latest.tag.replace(/^v/, "");
+  $("dlDate").textContent = fmtDate(latest.date);
+
+  $("relList").innerHTML = data.releases.map(function (r) {
+    var cur = r === latest;
+    return '<article class="rel-item reveal">' +
+      '<div class="rel-head"><span class="v">' + esc(r.tag.replace(/^v/, "")) + "</span>" + (cur ? '<span class="badge-latest">Latest</span>' : "") +
+      '<time datetime="' + esc(r.date) + '">' + fmtDate(r.date) + "</time></div>" +
+      "<p>" + esc(r.summary) + "</p>" +
+      '<div class="rel-files">' + r.assets.map(function (a) {
+        return '<a href="' + esc(a.url) + '" download rel="noopener">' + esc(a.label) + " <span>· " + mb(a.size) + "</span></a>";
+      }).join("") + "</div></article>";
+  }).join("");
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+  if (reduced) document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+  window.addEventListener("load", function () {
+    setTimeout(function () {
+      document.querySelectorAll(".reveal:not(.in)").forEach(function (el) { el.classList.add("in"); });
+    }, 700);
+  });
+})();
+</script>
+</body>
+</html>

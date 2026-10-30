@@ -17,12 +17,20 @@ to GitHub's release pages.
   The Chain as hero with a TEST TONE demo (`?demo=1` auto-arms), technical
   copy. Superseded by C but kept for comparison.
 - **`b-session-log.html`** — v1 downloads-first utility page.
-- **`c-modern-studio.html`** — the current direction. Modern component
-  language (Aceternity-style: spotlight hero, bento features, cursor-spotlight
-  cards, rotating glow borders, release timeline, floating navbar) with
-  plain-language copy: no protocol/codec jargon on the visible page — technical
-  detail lives in collapsed "What changed" sections for power users. Auto-detects
-  the visitor's platform and marks the right download "For you".
+- **`c-modern-studio.html`** — modern component direction. Aceternity-style
+  effects (spotlight hero, bento features, cursor-spotlight cards, rotating
+  glow borders, release timeline, floating navbar), plain-language copy,
+  platform auto-detect. Bugfix note: decorative overlays are
+  `pointer-events: none` — full-card pseudo-elements otherwise swallow
+  clicks on the buttons beneath them.
+- **`d-scroll-showcase.html`** — scroll-driven showcase. Aceternity
+  "Container Scroll" pattern: the real app console rebuilt in CSS tilts in
+  3D and levels out as you scroll; infinite app-compatibility marquee;
+  moving-border download rows. The app-window VU/tilt respect
+  reduced-motion, and a reveal safety-net guarantees no content stays hidden.
+- **`e-daylight.html`** — the daylight direction: same identity on warm
+  paper, light cards with soft shadows, a signal-path diagram, ink buttons.
+  Tests whether a light site suits the brand.
 
 Open directly in a browser (no build step) or:
 
