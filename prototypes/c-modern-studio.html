@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenAY Mic — turn your phone into a microphone for your computer</title>
+<meta name="description" content="Free, open-source app that turns an Android phone into a microphone for your Windows or Linux computer. Works with Zoom, OBS, Discord, Audacity — over Wi-Fi or a cable.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314120F'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FFB454'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #14120F;
+    --ink-2:  #171512;
+    --panel:  #1E1B16;
+    --panel-2:#221E18;
+    --line:   #34302A;
+    --cream:  #EFE6D4;
+    --amber:  #FFB454;
+    --dim:    #9A9083;
+    --radius: 16px;
+    --sans: "Inter", system-ui, "Segoe UI", sans-serif;
+    --disp: "Chakra Petch", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font: 16px/1.65 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--amber); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+  .eyebrow { font-family: var(--disp); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  .skip { position: absolute; left: -9999px; top: 0; z-index: 99; background: var(--amber); color: var(--ink); padding: 10px 16px; border-radius: 8px; font-weight: 600; }
+  .skip:focus { left: 16px; top: 16px; }
+
+  /* ============ floating navbar (Aceternity: Floating Navbar) ============ */
+  .fnav {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 50; width: min(920px, calc(100% - 24px));
+    display: flex; align-items: center; gap: 18px;
+    padding: 10px 12px 10px 18px;
+    background: rgba(23, 21, 18, .78);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    border: 1px solid rgba(52, 48, 42, .9); border-radius: 999px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.45);
+  }
+  .fnav .brand { display: flex; align-items: center; gap: 10px; font-family: var(--disp); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-size: 14px; }
+  .lamp { width: 9px; height: 9px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px rgba(255,180,84,.6); flex: none; }
+  .fnav nav { display: flex; gap: 22px; margin: 0 auto; }
+  .fnav nav a { font-size: 14px; color: var(--dim); transition: color .15s; }
+  .fnav nav a:hover { color: var(--cream); }
+  .fnav .nav-dl {
+    font-weight: 600; font-size: 13.5px; color: var(--ink);
+    background: var(--amber); border-radius: 999px; padding: 8px 16px;
+    transition: box-shadow .2s; white-space: nowrap;
+  }
+  .fnav .nav-dl:hover { box-shadow: 0 0 20px rgba(255,180,84,.4); }
+  @media (max-width: 700px) { .fnav nav { display: none; } }
+
+  /* ============ buttons ============ */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-weight: 600; font-size: 15px; border-radius: 999px;
+    padding: 14px 26px; transition: box-shadow .2s, transform .06s, background-color .2s;
+    border: 1px solid transparent; cursor: pointer;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn svg { flex: none; }
+  .btn-primary { background: var(--amber); color: var(--ink); }
+  .btn-primary:hover { box-shadow: 0 0 32px rgba(255,180,84,.35); }
+  .btn-ghost { border-color: var(--line); color: var(--cream); }
+  .btn-ghost:hover { background: var(--panel); }
+
+  /* ============ hero + spotlight (Aceternity: Spotlight) ============ */
+  .hero { position: relative; padding: 150px 0 60px; overflow: clip; }
+  .spotlight { position: absolute; inset: 0; pointer-events: none; }
+  .spotlight svg { position: absolute; top: -320px; opacity: .55; animation: drift 9s ease-in-out infinite alternate; }
+  .spotlight svg.s2 { left: 45%; transform: rotate(160deg); animation-delay: -4s; }
+  .spotlight svg.s1 { left: -18%; }
+  @keyframes drift { from { translate: 0 0; } to { translate: 40px 26px; } }
+  .hero-inner { position: relative; text-align: center; max-width: 840px; margin: 0 auto; }
+  .hero .eyebrow { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 8px 16px; margin-bottom: 28px; }
+  .hero .eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+  h1 {
+    font-family: var(--disp); font-weight: 700;
+    font-size: clamp(2.4rem, 5.8vw, 4.1rem);
+    line-height: 1.06; letter-spacing: -.01em;
+  }
+  h1 .hl { color: var(--amber); }
+  .hero .sub { margin: 22px auto 0; max-width: 62ch; color: var(--dim); font-size: clamp(1.02rem, 1.5vw, 1.18rem); }
+  .hero .sub strong { color: var(--cream); font-weight: 500; }
+  .hero-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 34px; }
+  .trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin-top: 26px; font-size: 13.5px; color: var(--dim); }
+  .trust span { display: inline-flex; align-items: center; gap: 7px; }
+  .trust svg { color: var(--amber); }
+
+  /* ============ section scaffolding ============ */
+  section.block { padding: 72px 0 8px; position: relative; }
+  .sec-head { text-align: center; max-width: 640px; margin: 0 auto 44px; }
+  .sec-head h2 { font-family: var(--disp); font-weight: 700; font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -.005em; margin-top: 12px; }
+  .sec-head p { color: var(--dim); margin-top: 12px; }
+
+  /* ============ bento grid (Aceternity: Bento Grid) ============ */
+  .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  .bcard {
+    position: relative; overflow: hidden;
+    grid-column: span 3; min-height: 200px;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 26px 26px 24px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .bcard.wide { grid-column: span 6; }
+  .bcard.slim { grid-column: span 2; }
+  .bcard::before {  /* cursor spotlight (Aceternity: Card Spotlight) */
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .35s;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgba(255,180,84,.09), transparent 65%);
+  }
+  .bcard:hover::before { opacity: 1; }
+  .bcard > * { position: relative; }
+  .bicon {
+    width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+    background: rgba(255,180,84,.09); border: 1px solid rgba(255,180,84,.22); color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .bcard h3 { font-size: 1.06rem; font-weight: 600; letter-spacing: -.005em; }
+  .bcard p { color: var(--dim); font-size: 14.5px; max-width: 52ch; }
+  .appchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .appchips span {
+    font-size: 13px; color: var(--cream); border: 1px solid var(--line);
+    background: rgba(20,18,15,.55); border-radius: 999px; padding: 6px 14px;
+  }
+  @media (max-width: 880px) { .bcard, .bcard.slim { grid-column: span 6; min-height: 0; } }
+
+  /* ============ mini chain demo (brand signature) ============ */
+  .chain-demo { margin-top: auto; display: flex; align-items: center; gap: 10px; padding-top: 14px; }
+  .mini-stage {
+    flex: none; width: 86px; text-align: center; border: 1px solid var(--line);
+    border-radius: 10px; background: var(--ink-2); padding: 10px 4px 8px;
+    display: grid; gap: 6px; justify-items: center;
+  }
+  .mini-stage .ms-label { font-family: var(--disp); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  .mini-stage .ms-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; transition: border-color .25s, box-shadow .25s; }
+  .mini-stage .ms-dot i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background-color .2s; }
+  .chain-demo.on .ms-dot { border-color: var(--amber); box-shadow: 0 0 12px rgba(255,180,84,.3); }
+  .chain-demo.on .ms-dot i { background: var(--amber); }
+  .mini-cable { flex: 1; height: 2px; background: var(--line); border-radius: 1px; position: relative; overflow: hidden; }
+  .mini-cable::after {
+    content: ""; position: absolute; inset: 0; opacity: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 4px, var(--amber) 4px 9px);
+    background-size: 18px 100%;
+  }
+  .chain-demo.on .mini-cable::after { opacity: .95; animation: cableflow 1s linear infinite; }
+  @keyframes cableflow { from { background-position: 0 0; } to { background-position: 18px 0; } }
+  .tone-chip {
+    margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; color: var(--dim);
+    border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer;
+    background: transparent; font-family: inherit; transition: color .2s, border-color .2s;
+  }
+  .tone-chip:hover { color: var(--cream); }
+  .tone-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: background-color .2s, box-shadow .2s; }
+  .chain-demo.on ~ .tone-chip, .tone-chip.on { color: var(--amber); border-color: rgba(255,180,84,.4); }
+  .tone-chip.on i { background: var(--tally); box-shadow: 0 0 8px rgba(229,72,77,.7); }
+  .tone-chip .t-on { display: none; }
+  .tone-chip.on .t-off { display: none; }
+  .tone-chip.on .t-on { display: inline; }
+
+  /* ============ setup strip ============ */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .step {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 22px;
+  }
+  .step .n { font-size: 13px; font-weight: 600; color: var(--amber); }
+  .step b { display: block; font-size: 15.5px; margin: 8px 0 4px; }
+  .step p { font-size: 14px; color: var(--dim); }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+
+  /* ============ glow-border cards (Aceternity: Hover Border Gradient / Glowing Effect) ============ */
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 880px) { .dl-grid { grid-template-columns: 1fr; } }
+  .dl-card { position: relative; border-radius: var(--radius); padding: 1px; background: var(--line); }
+  .dl-card::before {  /* rotating conic border */
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: conic-gradient(from var(--ang, 0deg), transparent 0 68%, rgba(255,180,84,.9) 82%, transparent 94%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0; transition: opacity .3s;
+  }
+  @property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  .dl-card:hover::before { opacity: 1; animation: spin-ang 3.2s linear infinite; }
+  @keyframes spin-ang { to { --ang: 360deg; } }
+  .dl-inner {
+    border-radius: calc(var(--radius) - 1px); height: 100%;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    padding: 26px 24px 24px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .dl-inner .os { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .dl-inner .os svg { color: var(--amber); }
+  .dl-inner .os h3 { font-size: 1.05rem; font-weight: 600; }
+  .badge-rec {
+    font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--amber); border-radius: 999px; padding: 3px 10px; margin-left: auto;
+  }
+  .dl-inner .file { font-size: 13px; color: var(--dim); word-break: break-all; }
+  .dl-inner .meta { display: flex; gap: 14px; font-size: 13px; color: var(--dim); margin-top: 2px; }
+  .dl-btn {
+    margin-top: auto; padding-top: 18px;
+  }
+  .dl-btn .btn { width: 100%; }
+  .dl-note { text-align: center; color: var(--dim); font-size: 13.5px; margin-top: 18px; }
+
+  details.more-dl { max-width: 720px; margin: 22px auto 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+  details.more-dl summary {
+    cursor: pointer; list-style: none; padding: 14px 20px;
+    display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--dim);
+  }
+  details.more-dl summary::-webkit-details-marker { display: none; }
+  details.more-dl summary::before { content: "+"; color: var(--amber); font-weight: 600; }
+  details.more-dl[open] summary::before { content: "−"; }
+  details.more-dl summary:hover { color: var(--cream); }
+  .more-dl-body { padding: 4px 20px 18px; display: grid; gap: 10px; }
+  .more-dl-body a { display: flex; justify-content: space-between; gap: 16px; font-size: 13.5px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--cream); transition: border-color .15s; }
+  .more-dl-body a:hover { border-color: var(--amber); }
+  .more-dl-body a span { color: var(--dim); }
+
+  /* ============ release timeline (Aceternity: Timeline) ============ */
+  .timeline { position: relative; max-width: 760px; margin: 0 auto; padding-left: 34px; }
+  .timeline::before { content: ""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--line); border-radius: 1px; }
+  .timeline::after {  /* moving beam */
+    content: ""; position: absolute; left: 8px; top: 6px; width: 2px; height: 90px;
+    background: linear-gradient(180deg, transparent, var(--amber), transparent);
+    animation: beam 4.5s ease-in-out infinite; border-radius: 1px;
+  }
+  @keyframes beam { 0% { translate: 0 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { translate: 0 460px; opacity: 0; } }
+  .t-item { position: relative; padding: 6px 0 34px; }
+  .t-item::before {
+    content: ""; position: absolute; left: -32px; top: 14px; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--panel-2); border: 2px solid var(--amber); box-shadow: 0 0 10px rgba(255,180,84,.35);
+  }
+  .t-item.old::before { border-color: var(--line); box-shadow: none; background: var(--ink-2); }
+  .t-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .t-ver { font-weight: 600; font-size: 1.05rem; }
+  .t-date { font-size: 13px; color: var(--dim); }
+  .badge-latest { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--amber); border: 1px solid rgba(255,180,84,.35); background: rgba(255,180,84,.08); border-radius: 999px; padding: 3px 10px; }
+  .t-item p { color: var(--dim); font-size: 14.5px; margin-top: 6px; max-width: 60ch; }
+  .t-item details { margin-top: 10px; }
+  .t-item summary { cursor: pointer; list-style: none; display: inline-flex; gap: 8px; align-items: center; font-size: 13.5px; font-weight: 500; color: var(--dim); }
+  .t-item summary::-webkit-details-marker { display: none; }
+  .t-item summary::before { content: "+"; color: var(--amber); font-weight: 600; }
+  .t-item details[open] summary::before { content: "−"; }
+  .t-item summary:hover { color: var(--cream); }
+  .t-notes { padding: 12px 2px 2px; display: grid; gap: 14px; }
+  .t-notes h4 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+  .t-notes ul { list-style: none; display: grid; gap: 5px; }
+  .t-notes li { font-size: 13.5px; color: var(--cream); padding-left: 16px; position: relative; }
+  .t-notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 1px; background: var(--dim); }
+  .t-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .t-files a {
+    font-size: 12.5px; color: var(--cream); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 13px; transition: border-color .15s, box-shadow .15s;
+  }
+  .t-files a:hover { border-color: var(--amber); box-shadow: 0 0 14px rgba(255,180,84,.15); }
+  .t-files a span { color: var(--dim); }
+
+  /* ============ FAQ ============ */
+  .faq { max-width: 760px; margin: 0 auto; }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq summary {
+    cursor: pointer; list-style: none; padding: 18px 4px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    font-weight: 500; font-size: 15.5px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .chev { color: var(--amber); transition: rotate .2s; flex: none; }
+  .faq details[open] summary .chev { rotate: 45deg; }
+  .faq .a { padding: 0 4px 20px; color: var(--dim); font-size: 14.5px; max-width: 66ch; }
+  .faq .a b { color: var(--cream); font-weight: 500; }
+
+  /* ============ footer ============ */
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 36px 0 46px; }
+  .foot { display: flex; flex-wrap: wrap; gap: 16px 30px; align-items: center; }
+  .foot .brand { display: flex; align-items: center; gap: 10px; font-family: var(--disp); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-size: 13px; }
+  .foot-note { font-size: 13px; color: var(--dim); }
+  .foot-links { margin-left: auto; display: flex; flex-wrap: wrap; gap: 20px; font-size: 13.5px; }
+  .foot-links a { color: var(--dim); }
+  .foot-links a:hover { color: var(--cream); }
+
+  /* ============ reveal on scroll ============ */
+  .reveal { opacity: 0; translate: 0 22px; transition: opacity .6s ease, translate .6s ease; }
+  .reveal.in { opacity: 1; translate: 0 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .spotlight svg, .timeline::after, .chain-demo.on .mini-cable::after, .dl-card:hover::before { animation: none; }
+    .reveal { opacity: 1; translate: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#download">Skip to download</a>
+
+<!-- floating navbar -->
+<div class="fnav" role="navigation" aria-label="Site">
+  <a class="brand" href="#top"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</a>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#download">Download</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="nav-dl" href="#download" id="navDl">Download</a>
+</div>
+
+<main id="top">
+  <!-- hero -->
+  <section class="hero" aria-label="Intro">
+    <div class="spotlight" aria-hidden="true">
+      <svg class="s1" width="640" height="860" viewBox="0 0 640 860" fill="none">
+        <defs><linearGradient id="beam1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFB454" stop-opacity=".34"/><stop offset="1" stop-color="#FFB454" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="M-60 380 L60 -200 L340 -200 L120 760 Z" fill="url(#beam1)"/>
+      </svg>
+      <svg class="s2" width="640" height="860" viewBox="0 0 640 860" fill="none">
+        <defs><linearGradient id="beam2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFB454" stop-opacity=".26"/><stop offset="1" stop-color="#FFB454" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="M-60 380 L60 -200 L340 -200 L120 760 Z" fill="url(#beam2)"/>
+      </svg>
+    </div>
+    <div class="wrap hero-inner">
+      <span class="eyebrow"><i aria-hidden="true"></i>Free &amp; open source · no account needed</span>
+      <h1>Turn your phone into a<br>microphone for your <span class="hl">computer</span>.</h1>
+      <p class="sub">
+        OpenAY Mic sends your phone's audio straight into your PC — <strong>over Wi-Fi
+        or a USB cable</strong>. Zoom, OBS, Discord, Audacity — every app simply sees a
+        real microphone.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" id="heroDl" href="#download">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="heroDlLabel">Download</span>
+        </a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="trust">
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No cloud</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No account</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No tracking</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Android, Windows &amp; Linux</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- features bento -->
+  <section class="block wrap" id="features" aria-labelledby="h-feat">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Features</span>
+      <h2 id="h-feat">Everything you need. Nothing you don't.</h2>
+      <p>Install it, connect it, forget it's there.</p>
+    </div>
+    <div class="bento">
+      <div class="bcard wide reveal">
+        <div class="bicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3>Works with everything that has a mic setting</h3>
+        <p>Once connected, your phone shows up as a regular microphone. Pick it in any app — nothing extra to configure.</p>
+        <div class="appchips" aria-label="Apps that work with OpenAY Mic">
+          <span>Zoom</span><span>Discord</span><span>OBS</span><span>Audacity</span><span>Streamlabs</span><span>Teams</span><span>Reaper</span><span>Webex</span><span>…and any other app</span>
+        </div>
+      </div>
+      <div class="bcard slim reveal">
+        <div class="bicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></div>
+        <h3>Wi-Fi or a cable — your choice</h3>
+        <p>Same network for wireless freedom, or plug in a USB cable when you want zero dropouts.</p>
+      </div>
+      <div class="bcard slim reveal">
+        <div class="bicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Your voice stays in the room</h3>
+        <p>Audio travels only between your devices. No cloud, no accounts, no analytics — ever.</p>
+      </div>
+      <div class="bcard slim reveal">
+        <div class="bicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <h3>Feels instant</h3>
+        <p>Tuned until the delay disappears — your lips stay in sync on stream, in calls, and in recordings.</p>
+      </div>
+      <div class="bcard reveal">
+        <div class="bicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+        <h3>Built like studio gear</h3>
+        <p>The apps show your audio flowing through the setup in real time — the site does too. Try the demo:</p>
+        <div class="chain-demo" id="chain">
+          <div class="mini-stage"><span class="ms-label">Mic</span><span class="ms-dot"><i></i></span><span class="ms-label" style="letter-spacing:.02em" id="msMic">Phone</span></div>
+          <div class="mini-cable" aria-hidden="true"></div>
+          <div class="mini-stage"><span class="ms-label">Link</span><span class="ms-dot"><i></i></span><span class="ms-label" style="letter-spacing:.02em" id="msLink">Idle</span></div>
+          <div class="mini-cable" aria-hidden="true"></div>
+          <div class="mini-stage"><span class="ms-label">Console</span><span class="ms-dot"><i></i></span><span class="ms-label" style="letter-spacing:.02em" id="msCon">Standby</span></div>
+        </div>
+        <button type="button" class="tone-chip" id="tone" aria-pressed="false">
+          <i aria-hidden="true"></i><span class="t-off">Play demo signal</span><span class="t-on">Stop demo</span>
+        </button>
+      </div>
+      <div class="bcard reveal">
+        <div class="bicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg></div>
+        <h3>Free. For real.</h3>
+        <p>Open source under the MIT license — every feature, every platform, no paywalls or "pro" tiers. Inspect it, tweak it, share it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- how it works -->
+  <section class="block wrap" id="how" aria-labelledby="h-how">
+    <div class="sec-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2 id="h-how">Three steps. About two minutes.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><span class="n">Step 1</span><b>Install the app on your phone</b><p>Download the app below and open it. Allow the microphone permission when asked.</p></div>
+      <div class="step reveal"><span class="n">Step 2</span><b>Run the receiver on your computer</b><p>Start OpenAY Mic on your Windows PC or Linux machine and leave it listening.</p></div>
+      <div class="step reveal"><span class="n">Step 3</span><b>Connect and go live</b><p>Use the same Wi-Fi network, or plug in a USB cable. Press the big button. Done.</p></div>
+    </div>
+  </section>
+
+  <!-- downloads -->
+  <section class="block wrap" id="download" aria-labelledby="h-dl">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Download</span>
+      <h2 id="h-dl">Get OpenAY Mic</h2>
+      <p>Free downloads, straight from the official build. Files save to your device — no sign-up, no installer bundles.</p>
+    </div>
+    <div class="dl-grid" id="dlCards"></div>
+    <p class="dl-note">Latest version <b id="dlVer" style="color:var(--cream)">—</b> · updated <span id="dlDate">—</span> · downloads are delivered by GitHub Releases</p>
+    <details class="more-dl">
+      <summary>More downloads, checksums &amp; older versions</summary>
+      <div class="more-dl-body" id="moreDl"></div>
+    </details>
+  </section>
+
+  <!-- releases timeline -->
+  <section class="block wrap" id="changelog" aria-labelledby="h-changes">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Release history</span>
+      <h2 id="h-changes">What's new</h2>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- faq -->
+  <section class="block wrap" id="faq" aria-labelledby="h-faq">
+    <div class="sec-head reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 id="h-faq">Before you download</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>Is it really free? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a"><b>Yes.</b> Open source under the MIT license, and the downloads are free. There is no paid tier, no account, and nothing is metered.</div>
+      </details>
+      <details>
+        <summary>Do I need to "root" my phone or install drivers? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">No. Everything runs normally on both your phone and your computer — no special permissions beyond the microphone.</div>
+      </details>
+      <details>
+        <summary>Will my apps actually see it as a microphone? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a"><b>On Linux, yes — everywhere.</b> It appears as a regular microphone for every app. On Windows, you pair it once with a free "virtual audio cable" app (like VB-Cable) so other programs can select it — the same one-time setup streamers already use.</div>
+      </details>
+      <details>
+        <summary>Wi-Fi or cable — which should I use? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">Try Wi-Fi first — it's the most convenient. If your network is busy and you hear hiccups, a USB cable gives a rock-solid connection.</div>
+      </details>
+      <details>
+        <summary>Is my audio private? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">Your audio travels only between your phone and your computer on your own network. It never touches the internet, and the app collects nothing.</div>
+      </details>
+      <details>
+        <summary>How current are the files on this page? <span class="chev" aria-hidden="true">+</span></summary>
+        <div class="a">The list refreshes automatically whenever a new version is published. The <b>official releases page</b> on GitHub is always the source of truth.</div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="brand"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</span>
+    <span class="foot-note">MIT © 2026 Aryan Yadav · built in the open</span>
+    <div class="foot-links">
+      <a href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">Source code</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/releases" target="_blank" rel="noopener">All releases</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/issues" target="_blank" rel="noopener">Report a problem</a>
+    </div>
+  </div>
+</footer>
+
+<script src="releases-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
+  function fmtDate(iso) {
+    return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  }
+
+  var data = window.OPENAY_SITE;
+  var latest = data.releases.filter(function (r) { return r.latest; })[0] || data.releases[0];
+  function asset(rel, key) {
+    for (var i = 0; i < rel.assets.length; i++) {
+      var n = rel.assets[i].name;
+      if (key === "android" && /android\.apk$/.test(n) && !/bluetooth/.test(n)) return rel.assets[i];
+      if (key === "android-bt" && /bluetooth/.test(n)) return rel.assets[i];
+      if (key === "windows" && /windows.*\.zip$/.test(n)) return rel.assets[i];
+      if (key === "linux" && /linux.*\.tar\.gz$/.test(n)) return rel.assets[i];
+      if (key === "checksums" && /SHA256SUMS/i.test(n)) return rel.assets[i];
+    }
+    return null;
+  }
+
+  /* ---- platform detect (best-effort) ---- */
+  var platform = "other";
+  var uaPlat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  if (/android/i.test(navigator.userAgent)) platform = "android";
+  else if (/win/i.test(uaPlat)) platform = "windows";
+  else if (/linux/i.test(uaPlat)) platform = "linux";
+
+  var osNames = { android: "Android", windows: "Windows", linux: "Linux", other: "" };
+  var heroBtn = $("heroDl"), heroLbl = $("heroDlLabel"), navDl = $("navDl");
+  var heroAsset = asset(latest, platform === "other" ? "android" : platform);
+  if (heroAsset && platform !== "other") {
+    heroBtn.href = heroAsset.url; heroBtn.setAttribute("download", ""); heroBtn.setAttribute("rel", "noopener");
+    navDl.href = heroAsset.url; navDl.setAttribute("download", ""); navDl.setAttribute("rel", "noopener");
+    heroLbl.textContent = "Download for " + osNames[platform];
+    navDl.textContent = "Download";
+  }
+
+  /* ---- download cards ---- */
+  var cards = [
+    { key: "android",  os: "Android",       sub: "For your phone — this is the mic" },
+    { key: "windows",  os: "Windows",       sub: "For your PC — this is the receiver" },
+    { key: "linux",    os: "Linux",         sub: "For your machine — this is the receiver" }
+  ];
+  $("dlCards").innerHTML = cards.map(function (c) {
+    var a = asset(latest, c.key);
+    if (!a) return "";
+    var rec = c.key === platform;
+    return '<div class="dl-card reveal"><div class="dl-inner">' +
+      '<div class="os"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>' +
+      "<h3>" + esc(c.os) + "</h3>" + (rec ? '<span class="badge-rec">For you</span>' : "") + "</div>" +
+      '<p style="font-size:14px;color:var(--dim)">' + esc(c.sub) + "</p>" +
+      '<span class="file">' + esc(a.name) + "</span>" +
+      '<span class="meta"><span>' + mb(a.size) + "</span><span>" + (c.key === "android" ? "APK · installs like a normal app" : "self-contained · no installer") + "</span></span>" +
+      '<div class="dl-btn"><a class="btn btn-primary" href="' + esc(a.url) + '" download rel="noopener">Download for ' + esc(c.os) + "</a></div>" +
+      "</div></div>";
+  }).join("");
+  $("dlVer").textContent = latest.tag.replace(/^v/, "");
+  $("dlDate").textContent = fmtDate(latest.date);
+
+  var extras = [];
+  var bt = asset(latest, "android-bt");
+  if (bt) extras.push({ a: bt, note: "Android app with Bluetooth support (experimental)" });
+  var sum = asset(latest, "checksums");
+  if (sum) extras.push({ a: sum, note: "Checksum file to verify your download" });
+  $("moreDl").innerHTML =
+    extras.map(function (e) {
+      return '<a href="' + esc(e.a.url) + '" download rel="noopener">' + esc(e.a.name) + "<span>" + esc(e.note) + " · " + mb(e.a.size) + "</span></a>";
+    }).join("") +
+    data.releases.filter(function (r) { return r !== latest; }).map(function (r) {
+      return r.assets.map(function (a) {
+        return '<a href="' + esc(a.url) + '" download rel="noopener">' + esc(a.name) + "<span>" + esc(r.tag) + " · " + mb(a.size) + "</span></a>";
+      }).join("");
+    }).join("");
+
+  /* ---- timeline ---- */
+  $("timeline").innerHTML = data.releases.map(function (r) {
+    var cur = r === latest;
+    return '<article class="t-item' + (cur ? "" : " old") + ' reveal">' +
+      '<div class="t-head"><span class="t-ver">' + esc(r.tag.replace(/^v/, "")) + "</span>" +
+      (cur ? '<span class="badge-latest">Latest</span>' : "") +
+      '<span class="t-date">' + fmtDate(r.date) + "</span></div>" +
+      "<p>" + esc(r.summary) + "</p>" +
+      '<details><summary>What changed</summary><div class="t-notes">' +
+      (r.notes || []).map(function (g) {
+        return "<div><h4>" + esc(g.h) + "</h4><ul>" + g.items.map(function (it) { return "<li>" + esc(it) + "</li>"; }).join("") + "</ul></div>";
+      }).join("") + "</div></details>" +
+      '<div class="t-files">' + r.assets.map(function (a) {
+        return '<a href="' + esc(a.url) + '" download rel="noopener">' + esc(a.label) + " <span>· " + mb(a.size) + "</span></a>";
+      }).join("") + "</div>" +
+      "</article>";
+  }).join("");
+
+  /* ---- chain demo ---- */
+  var chain = $("chain"), tone = $("tone");
+  function setChain(on) {
+    chain.classList.toggle("on", on);
+    tone.classList.toggle("on", on);
+    tone.setAttribute("aria-pressed", on ? "true" : "false");
+    $("msMic").textContent = on ? "Recording" : "Phone";
+    $("msLink").textContent = on ? "Live" : "Idle";
+    $("msCon").textContent = on ? "Streaming" : "Standby";
+  }
+  tone.addEventListener("click", function () { setChain(!chain.classList.contains("on")); });
+  if (new URLSearchParams(location.search).has("demo")) { setTimeout(function () { setChain(true); }, reduced ? 150 : 900); }
+
+  /* ---- cursor spotlight on cards ---- */
+  document.addEventListener("pointermove", function (e) {
+    var c = e.target && e.target.closest ? e.target.closest(".bcard") : null;
+    if (!c) return;
+    var r = c.getBoundingClientRect();
+    c.style.setProperty("--mx", (e.clientX - r.left) + "px");
+    c.style.setProperty("--my", (e.clientY - r.top) + "px");
+  }, { passive: true });
+
+  /* ---- reveal on scroll ---- */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+  if (reduced) document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+})();
+</script>
+</body>
+</html>
