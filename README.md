@@ -1,113 +1,67 @@
 # openay-mic-site
 
 Website for **OpenAY Mic** — publishes every GitHub release for free download.
+Live at `https://openay-mic.pages.dev` (once Cloudflare Pages is connected).
 
-Kept in its own repository on purpose: nothing website-related lands in the
-main repo. Status: **prototypes — nothing deployed yet.**
+Zero-dependency static site: plain HTML/CSS/JS, no build tooling, no frameworks.
+Release data is baked from the GitHub API at deploy time — the site never calls
+the API from the visitor's browser, so there are no rate limits.
 
-## Prototypes (`prototypes/`)
+Design language follows the project brief in OpenAY-Mic's `shared/design.md`
+("studio rack at night": warm graphite + amber, Chakra Petch + IBM Plex Mono).
+Aceternity-style component patterns are implemented dependency-free; see
+`prototypes/` for the exploration history.
 
-All follow the project identity (warm graphite + amber, Chakra Petch for the
-wordmark) and read from the same snapshot of the real GitHub releases
-(`releases-data.js`, snapshotted 2026-10-31). Every download button points at
-the real release asset on GitHub — they are direct file downloads, not links
-to GitHub's release pages.
+## How releases update automatically
 
-- **`a-studio-rack.html`** — v1 product-story landing. Machined-panel look,
-  The Chain as hero with a TEST TONE demo (`?demo=1` auto-arms), technical
-  copy. Superseded by C but kept for comparison.
-- **`b-session-log.html`** — v1 downloads-first utility page.
-- **`c-modern-studio.html`** — modern component direction. Aceternity-style
-  effects (spotlight hero, bento features, cursor-spotlight cards, rotating
-  glow borders, release timeline, floating navbar), plain-language copy,
-  platform auto-detect. Bugfix note: decorative overlays are
-  `pointer-events: none` — full-card pseudo-elements otherwise swallow
-  clicks on the buttons beneath them.
-- **`d-scroll-showcase.html`** — scroll-driven showcase. Aceternity
-  "Container Scroll" pattern: the real app console rebuilt in CSS tilts in
-  3D and levels out as you scroll; infinite app-compatibility marquee;
-  moving-border download rows. The app-window VU/tilt respect
-  reduced-motion, and a reveal safety-net guarantees no content stays hidden.
-- **`e-daylight.html`** — the daylight direction: same identity on warm
-  paper, light cards with soft shadows, a signal-path diagram, ink buttons.
-  Tests whether a light site suits the brand.
-- **`f-fusion.html`** — the synthesis direction (current favorite): A's
-  interactive TEST TONE demo inside D's app-window showpiece, C's bento and
-  download cards on D's clean minimal styling. Adds:
-  - **Theme switcher** — Light / Iced Amber (default) / AMOLED (pure black,
-    for OLED screens — black pixels are off, saving battery and giving
-    infinite contrast). Persisted in localStorage, applied before first
-    paint; `?theme=light` / `?theme=amoled` force a theme for sharing.
-  - **Downloads dropdown** in the navbar: three direct options
-    (Android APK / Windows / Linux) + link to all downloads.
-  - **Clean download labels** — "Android APK · v0.3.0", no raw filenames.
-    File sizes removed: the prototype's snapshot data is static, so sizes
-    would go stale. When production bakes releases.json at deploy time they
-    become accurate and can return.
-  - The demo is labeled a **visual showpiece, not a screenshot**.
-  - **GitHub + Star buttons** in the topbar (footer keeps Source code too).
-    The star button opens the repo in a new tab — starring can only happen
-    on GitHub while logged in, so no site can star for you; the button says
-    so in its tooltip, fills the star after use, and remembers it.
-  - **No checksum rows** — the v0.1.0 asset names broke filename-based
-    labeling (two "Checksums" chips), and checksums only existed for v0.1.0;
-    anyone hashing can use the GitHub release page.
-  - Background: the angled spotlight beams are gone — one soft themed glow
-    at the top, coherent across themes.
-  - Chain demo powers on when scrolled into view; stages stack on phones
-    (probe-verified overflow fix).
+1. You publish a release on [`yadav-aryan18/openay-mic`](https://github.com/yadav-aryan18/openay-mic).
+2. Hourly, [`update-releases.yml`](.github/workflows/update-releases.yml) runs
+   `scripts/generate-releases.mjs`, which bakes `public/releases.js` from the
+   GitHub API (labels computed from file extension, notes parsed from the
+   release body) and commits it **only if something changed**.
+3. That commit triggers the Cloudflare Pages git integration → automatic deploy.
 
-Open directly in a browser (no build step) or:
+Cloudflare also runs the generator on every deploy, so data is always fresh at
+build time regardless of the bot. Prereleases are included by design; drafts
+never are. If automation ever fails, the site keeps serving the last baked
+data — it can go stale, never down.
 
-```bash
-python3 -m http.server 8477 --directory prototypes
-# http://127.0.0.1:8477/c-modern-studio.html
+## One-time deploy setup (Cloudflare)
+
+1. Create a free account at [dash.cloudflare.com](https://dash.cloudflare.com).
+2. **Workers & Pages → Create application → Pages → Connect to Git**, authorize
+   GitHub, pick this repo.
+3. Build settings: framework preset **None**, build command
+   `node scripts/generate-releases.mjs`, build output directory **`/public`**.
+4. Deploy → the project name becomes the subdomain: `openay-mic.pages.dev`.
+
+Every push to `main` (including the release bot's) deploys automatically.
+
+### Custom domain
+
+- Real domain (e.g. `openay-mic.xyz`): buy it (Cloudflare Registrar sells at
+  cost, ~$9/yr), then in the Pages project: **Custom domains → Set up a custom
+  domain** — DNS is automatic since both live on Cloudflare.
+- Free subdomain: [`openay-mic.is-a.dev`](https://www.is-a.dev) via a one-file
+  PR to [is-a-dev/register](https://github.com/is-a-dev/register) pointing a
+  CNAME at `openay-mic.pages.dev`, then add it under Custom domains.
+
+## Repo layout
+
+```
+public/index.html    the site (single page, three themes, no build step)
+public/releases.js   GENERATED release data — do not edit by hand
+scripts/generate-releases.mjs   bakes GitHub releases into releases.js
+.github/workflows/update-releases.yml   hourly bake + conditional commit
+prototypes/          design exploration history (A–F) with screenshots
 ```
 
-`preview/` holds rendered screenshots.
+## Local preview
 
-## Component sources (for production)
+```bash
+node scripts/generate-releases.mjs   # refresh data
+python3 -m http.server 8478 --directory public
+# http://127.0.0.1:8478
+```
 
-Prototype C hand-builds the effects, but production can adopt the real
-libraries — all React + Tailwind based, so the site becomes a Vite/Next
-static build (still 100% free to host):
-
-- [Aceternity UI](https://ui.aceternity.com/components) — free tier is
-  copy-paste and allows personal & commercial use (paid "all-access" blocks
-  excluded). Components mapped in C: Spotlight, Bento Grid, Card Spotlight,
-  Hover Border Gradient/Glowing Effect, Timeline, Floating Navbar.
-- [Magic UI](https://magicui.design) and [shadcn/ui](https://ui.shadcn.com) —
-  same stack, good fallbacks for specific pieces.
-
-## Direct downloads
-
-Buttons use GitHub release asset URLs with the `download` attribute — the
-browser saves the file immediately; no GitHub page is ever shown. In
-production we additionally generate friendly links on our own domain
-(`/dl/android`, `/dl/windows`, `/dl/linux`, `/dl/latest`) that redirect to the
-current release assets:
-
-- On Cloudflare Pages: a generated `_redirects` file (clean 302s).
-- On GitHub Pages: tiny static stub pages with instant meta-refresh.
-
-Files stay physically on GitHub Releases (unlimited bandwidth, zero cost).
-If we ever want downloads fully off GitHub: mirror assets to Cloudflare R2
-(10 GB free storage, zero egress fees) from the same workflow.
-
-## Domain & hosting plan
-
-- **Hosting:** Cloudflare Pages (recommended — free, unlimited bandwidth,
-  custom domains, clean 302 redirects) or GitHub Pages.
-- **Free URL now:** `openay-mic.pages.dev` (instant) or a free developer
-  subdomain like `openay-mic.is-a.dev` (PR to [is-a-dev/register](https://github.com/is-a-dev/register)).
-- **Real domain:** nothing registrable is free forever; .xyz at-cost is
-  ~$9.33/yr via Cloudflare Registrar. Checked via RDAP on 2026-10-31 — all
-  available: `openay-mic.xyz`, `openaymic.xyz`, `openaymic.com`, `openaymic.dev`,
-  `openay-mic.dev`. GitHub Student Pack gives a free domain for a year if eligible.
-
-## Next steps
-
-1. Approve direction C (or request tweaks).
-2. Productionize: Vite/React build with real component libraries, generated
-   `releases.json`, `/dl/` redirect generation, meta/OG tags.
-3. Push repo, attach host + domain, enable deploys.
+MIT © 2026 Aryan Yadav
