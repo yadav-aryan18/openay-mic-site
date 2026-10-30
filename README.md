@@ -1,9 +1,9 @@
 # openay-mic-site
 
 Website for **OpenAY Mic** — live at
-[`openay-mic-site.aryanyadav159.workers.dev`](https://openay-mic-site.aryanyadav159.workers.dev)
+[`openay-mic.fosslab.workers.dev`](https://openay-mic.fosslab.workers.dev)
 (deployed as a Cloudflare Worker with static assets — Cloudflare's unified
-flow creates Workers, whose default domain is `<project>.<account-alias>.workers.dev`,
+flow creates Workers with `<project>.<account-alias>.workers.dev` domains,
 rather than classic Pages projects, which get `<name>.pages.dev`).
 
 Zero-dependency static site: plain HTML/CSS/JS, no build tooling, no frameworks.
@@ -43,7 +43,7 @@ release bot's) deploys automatically.
   domain** — DNS is automatic since both live on Cloudflare.
 - Free subdomain: [`openay-mic.is-a.dev`](https://www.is-a.dev) via a one-file
   PR to [is-a-dev/register](https://github.com/is-a-dev/register) pointing a
-  CNAME at `openay-mic-site.aryanyadav159.workers.dev`, then add it under
+  CNAME at `openay-mic.fosslab.workers.dev`, then add it under
   Custom domains.
 - A classic *Pages* project (for an `openay-mic.pages.dev` name) can still be
   created separately, but the Worker serves identically.
