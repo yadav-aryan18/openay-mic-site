@@ -1,7 +1,10 @@
 # openay-mic-site
 
-Website for **OpenAY Mic** — publishes every GitHub release for free download.
-Live at `https://openay-mic.pages.dev` (once Cloudflare Pages is connected).
+Website for **OpenAY Mic** — live at
+[`openay-mic-site.aryanyadav159.workers.dev`](https://openay-mic-site.aryanyadav159.workers.dev)
+(deployed as a Cloudflare Worker with static assets — Cloudflare's unified
+flow creates Workers, whose default domain is `<project>.<account-alias>.workers.dev`,
+rather than classic Pages projects, which get `<name>.pages.dev`).
 
 Zero-dependency static site: plain HTML/CSS/JS, no build tooling, no frameworks.
 Release data is baked from the GitHub API at deploy time — the site never calls
@@ -26,25 +29,24 @@ build time regardless of the bot. Prereleases are included by design; drafts
 never are. If automation ever fails, the site keeps serving the last baked
 data — it can go stale, never down.
 
-## One-time deploy setup (Cloudflare)
+## One-time deploy setup (Cloudflare) — done
 
-1. Create a free account at [dash.cloudflare.com](https://dash.cloudflare.com).
-2. **Workers & Pages → Create application → Pages → Connect to Git**, authorize
-   GitHub, pick this repo.
-3. Build settings: framework preset **None**, build command
-   `node scripts/generate-releases.mjs`, build output directory **`/public`**.
-4. Deploy → the project name becomes the subdomain: `openay-mic.pages.dev`.
-
-Every push to `main` (including the release bot's) deploys automatically.
+Deployed via **Workers & Pages → Connect to Git**: the repo is connected, the
+build command `node scripts/generate-releases.mjs` runs at every deploy, and
+the static assets in `public/` are served. Every push to `main` (including the
+release bot's) deploys automatically.
 
 ### Custom domain
 
 - Real domain (e.g. `openay-mic.xyz`): buy it (Cloudflare Registrar sells at
-  cost, ~$9/yr), then in the Pages project: **Custom domains → Set up a custom
+  cost, ~$9/yr), then in the project: **Custom domains → Set up a custom
   domain** — DNS is automatic since both live on Cloudflare.
 - Free subdomain: [`openay-mic.is-a.dev`](https://www.is-a.dev) via a one-file
   PR to [is-a-dev/register](https://github.com/is-a-dev/register) pointing a
-  CNAME at `openay-mic.pages.dev`, then add it under Custom domains.
+  CNAME at `openay-mic-site.aryanyadav159.workers.dev`, then add it under
+  Custom domains.
+- A classic *Pages* project (for an `openay-mic.pages.dev` name) can still be
+  created separately, but the Worker serves identically.
 
 ## Repo layout
 
