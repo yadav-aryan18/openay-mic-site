@@ -1,0 +1,5 @@
+# Windows metadata (this drive is shared with a Windows install)
+Thumbs.db
+Desktop.ini
+# macOS safety
+.DS_Store

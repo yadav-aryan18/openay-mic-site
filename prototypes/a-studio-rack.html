@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenAY Mic — the phone is the microphone</title>
+<meta name="description" content="OpenAY Mic turns an Android phone into a real, system-wide microphone for Linux and Windows — Wi-Fi or USB, PCM or Opus, measured p50 ≈ 47 ms. Free, MIT, no accounts.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2314120F'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FFB454'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #14120F;
+    --panel:  #1E1B16;
+    --panel-hi:#232019;
+    --line:   #34302A;
+    --cream:  #EFE6D4;
+    --amber:  #FFB454;
+    --tally:  #E5484D;
+    --dim:    #8D8477;
+    --disp: "Chakra Petch", sans-serif;
+    --mono: "IBM Plex Mono", monospace;
+    --body: Roboto, system-ui, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font: 16px/1.65 var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--amber); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 2px; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+  .caps { font-family: var(--disp); text-transform: uppercase; letter-spacing: .09em; }
+  .mono { font-family: var(--mono); }
+  .dim  { color: var(--dim); }
+  .skip {
+    position: absolute; left: -9999px; top: 0; z-index: 10;
+    background: var(--amber); color: var(--ink); padding: 10px 16px;
+    font-family: var(--disp); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 13px;
+  }
+  .skip:focus { left: 12px; top: 12px; }
+
+  /* ---------- header ---------- */
+  .site-head { border-bottom: 1px solid var(--line); }
+  .site-head .wrap {
+    display: flex; align-items: center; gap: 28px; height: 64px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--disp); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 15px; }
+  .lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 12px rgba(255,180,84,.55); flex: none; }
+  .site-nav { margin-left: auto; display: flex; gap: 26px; font-family: var(--disp); font-weight: 500; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+  .site-nav a { color: var(--dim); transition: color .15s; }
+  .site-nav a:hover { color: var(--cream); }
+  @media (max-width: 620px) { .site-nav { gap: 18px; } }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--disp); font-weight: 600; font-size: 14px;
+    text-transform: uppercase; letter-spacing: .09em;
+    padding: 13px 22px; border-radius: 2px; border: 1px solid var(--line);
+    transition: box-shadow .18s, border-color .18s, background-color .18s, transform .05s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-amber { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+  .btn-amber:hover { box-shadow: 0 0 26px rgba(255,180,84,.28); }
+  .btn-ghost { background: transparent; color: var(--cream); }
+  .btn-ghost:hover { border-color: var(--dim); background: var(--panel); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: clamp(48px, 9vw, 96px) 0 40px; }
+  .eyebrow { font-size: 12px; color: var(--dim); margin-bottom: 22px; }
+  h1 {
+    font-family: var(--disp); font-weight: 600;
+    font-size: clamp(2.5rem, 6.6vw, 4.4rem);
+    line-height: 1.04; letter-spacing: -.01em; max-width: 14ch;
+  }
+  h1 em { font-style: normal; color: var(--amber); }
+  .lede { margin-top: 22px; max-width: 58ch; color: var(--dim); font-size: clamp(1rem, 1.4vw, 1.13rem); }
+  .lede strong { color: var(--cream); font-weight: 500; }
+  .lede .mono { font-size: .94em; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+
+  /* ---------- the chain ---------- */
+  .chain-panel {
+    margin-top: 54px;
+    background: linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 100%);
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 22px clamp(16px, 3vw, 30px) 26px;
+  }
+  .chain-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .chain-head .title { font-size: 13px; font-weight: 600; }
+  .chain-head .note { font-size: 11px; letter-spacing: .06em; }
+  .tone { margin-left: auto; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .tone .caps { font-size: 11px; color: var(--dim); }
+  .tone input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .tone-track {
+    width: 40px; height: 20px; border-radius: 2px; border: 1px solid var(--line);
+    background: var(--ink); position: relative; transition: border-color .18s, background-color .18s;
+  }
+  .tone-knob {
+    position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 2px;
+    background: var(--dim); transition: left .18s, background-color .18s;
+  }
+  .tone input:checked ~ .tone-track { border-color: var(--amber); }
+  .tone input:checked ~ .tone-track .tone-knob { left: 22px; background: var(--amber); }
+  .tone input:focus-visible ~ .tone-track { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+  .chain { display: flex; align-items: stretch; gap: 0; margin-top: 26px; }
+  .stage {
+    flex: none; width: clamp(118px, 22vw, 170px);
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 16px 10px 14px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    background: transparent; opacity: .55;
+    transition: opacity .3s, background-color .3s;
+  }
+  .chain.powered .stage { opacity: 1; background: var(--panel); }
+  .stage-label { font-size: 11px; color: var(--dim); }
+  .stage-value { font-family: var(--mono); font-size: 13px; color: var(--dim); letter-spacing: .02em; transition: color .25s; white-space: nowrap; }
+  .chain.hot .stage-value { color: var(--cream); }
+
+  .ring {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 2px solid var(--line); display: grid; place-items: center;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .ring .dot { width: 9px; height: 9px; border-radius: 50%; background: transparent; transition: background-color .2s; }
+  .chain.hot .ring { border-color: var(--amber); box-shadow: 0 0 18px rgba(255,180,84,.35); }
+  .chain.hot .ring .dot { background: var(--tally); }
+
+  .cable { flex: 1 1 0; align-self: center; height: 2px; margin: 0 10px; background: var(--line); border-radius: 1px; position: relative; overflow: hidden; opacity: .6; transition: opacity .3s; }
+  .chain.powered .cable { opacity: 1; }
+  .cable .pulse {
+    position: absolute; inset: 0; opacity: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 5px, var(--amber) 5px 11px);
+    background-size: 22px 100%;
+  }
+  .chain.hot .cable .pulse { opacity: .95; animation: cableflow 1s linear infinite; }
+  @keyframes cableflow { from { background-position: 0 0; } to { background-position: 22px 0; } }
+
+  /* power-on stagger */
+  .chain .stage, .chain .cable { transition-delay: calc(var(--i) * 110ms); }
+
+  /* VU ladder */
+  .vu-row { display: flex; align-items: center; gap: 16px; margin-top: 22px; }
+  .vu { display: flex; gap: 3px; flex: 1; height: 14px; }
+  .vu i { flex: 1; background: var(--line); border-radius: 1px; transition: background-color .05s linear; }
+  .vu i.s1 { background: var(--cream); }
+  .vu i.s2 { background: var(--amber); }
+  .vu i.s3 { background: var(--tally); }
+  .vu-meta { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .05em; white-space: nowrap; }
+  .vu-meta b { color: var(--cream); font-weight: 500; }
+
+  /* status strip */
+  .status {
+    margin-top: 26px; padding: 12px 2px;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12.5px; color: var(--dim); letter-spacing: .04em;
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+  }
+  .status .on { color: var(--amber); }
+
+  /* ---------- patch list ---------- */
+  section.block { padding: 64px 0 8px; }
+  .block-head { display: flex; align-items: baseline; gap: 18px; border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 6px; }
+  .block-head h2 { font-family: var(--disp); font-weight: 600; font-size: 1.35rem; text-transform: uppercase; letter-spacing: .1em; }
+  .block-head .kicker { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .06em; }
+
+  .patch { list-style: none; }
+  .patch li {
+    display: grid; grid-template-columns: 150px 1fr; gap: 8px 28px;
+    padding: 22px 2px; border-bottom: 1px solid var(--line);
+  }
+  .patch li:last-child { border-bottom: 0; }
+  .patch .p-label { font-family: var(--disp); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--dim); padding-top: 4px; }
+  .patch .p-main { color: var(--cream); font-weight: 500; }
+  .patch .p-detail { display: block; font-family: var(--mono); font-size: 13px; color: var(--dim); margin-top: 5px; line-height: 1.6; }
+
+  /* ---------- setup steps ---------- */
+  .steps { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; padding-top: 26px; }
+  .steps li { border: 1px solid var(--line); border-radius: 2px; background: var(--panel); padding: 20px 20px 22px; }
+  .step-num { font-family: var(--mono); font-size: 13px; color: var(--amber); letter-spacing: .08em; }
+  .steps b { display: block; font-family: var(--disp); font-weight: 600; font-size: 15px; letter-spacing: .05em; text-transform: uppercase; margin: 10px 0 6px; }
+  .steps p { font-size: 14px; color: var(--dim); }
+
+  /* ---------- releases ---------- */
+  .release {
+    border: 1px solid var(--line); border-radius: 2px;
+    background: linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 100%);
+    padding: 24px clamp(16px, 3vw, 30px);
+    margin-top: 26px;
+  }
+  .rel-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .rel-ver { font-family: var(--mono); font-weight: 600; font-size: 17px; letter-spacing: .02em; }
+  .tag-latest {
+    font-family: var(--disp); font-weight: 600; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink); background: var(--amber); border-radius: 2px; padding: 3px 8px;
+  }
+  .tag-arch { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .08em; }
+  .rel-date { font-family: var(--mono); font-size: 12.5px; color: var(--dim); margin-left: auto; }
+  .rel-summary { margin-top: 12px; color: var(--dim); font-size: 14.5px; max-width: 72ch; }
+
+  .assets { margin-top: 18px; border-top: 1px solid var(--line); }
+  a.asset {
+    display: grid; grid-template-columns: 130px 1fr auto auto; gap: 18px; align-items: center;
+    padding: 13px 6px; border-bottom: 1px solid var(--line); transition: background-color .14s;
+  }
+  a.asset:hover { background: rgba(255,180,84,.05); }
+  .a-label { font-family: var(--disp); font-weight: 600; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--cream); }
+  .a-name { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+  .a-hint { display: block; font-family: var(--body); font-size: 12.5px; color: var(--dim); margin-top: 3px; word-break: normal; }
+  .a-size { font-family: var(--mono); font-size: 12.5px; color: var(--dim); white-space: nowrap; }
+  .a-get {
+    font-family: var(--disp); font-weight: 600; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--amber); border: 1px solid var(--line); border-radius: 2px; padding: 6px 12px;
+    transition: border-color .14s, background-color .14s;
+  }
+  a.asset:hover .a-get { border-color: var(--amber); background: rgba(255,180,84,.08); }
+
+  .notes { margin-top: 16px; }
+  .notes summary {
+    cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--disp); font-weight: 600; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+  }
+  .notes summary::-webkit-details-marker { display: none; }
+  .notes summary::before { content: "+"; font-family: var(--mono); color: var(--amber); }
+  .notes[open] summary::before { content: "−"; }
+  .notes summary:hover { color: var(--cream); }
+  .notes-body { padding: 18px 4px 4px; display: grid; gap: 16px; }
+  .notes-body h3 { font-family: var(--disp); font-weight: 500; font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; }
+  .notes-body ul { list-style: none; display: grid; gap: 7px; }
+  .notes-body li { font-size: 14px; color: var(--cream); padding-left: 18px; position: relative; }
+  .notes-body li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 1px; background: var(--dim); }
+
+  details.release-old { padding: 0; }
+  details.release-old > summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 20px clamp(16px, 3vw, 30px);
+  }
+  details.release-old > summary::-webkit-details-marker { display: none; }
+  details.release-old .chev { font-family: var(--mono); color: var(--amber); }
+  details.release-old .rel-summary { margin: 0; }
+  details.release-old[open] > summary { border-bottom: 1px solid var(--line); }
+  details.release-old .rel-body { padding: 8px clamp(16px, 3vw, 30px) 24px; }
+
+  .more-link { display: inline-block; margin-top: 22px; font-family: var(--mono); font-size: 13px; color: var(--dim); border-bottom: 1px solid var(--line); transition: color .15s, border-color .15s; }
+  .more-link:hover { color: var(--amber); border-color: var(--amber); }
+
+  /* ---------- footer ---------- */
+  footer { margin-top: 90px; border-top: 1px solid var(--line); padding: 34px 0 46px; }
+  .foot-row { display: flex; flex-wrap: wrap; gap: 14px 30px; align-items: center; }
+  .foot-note { font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+  .foot-links { margin-left: auto; display: flex; flex-wrap: wrap; gap: 22px; font-family: var(--disp); font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+  .foot-links a { color: var(--dim); }
+  .foot-links a:hover { color: var(--cream); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 760px) {
+    .patch li { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    a.asset { grid-template-columns: 1fr auto; grid-template-areas: "label get" "name get" "size get"; gap: 4px 14px; padding: 16px 6px; }
+    a.asset .a-label { grid-area: label; }
+    a.asset .a-name  { grid-area: name; }
+    a.asset .a-size  { grid-area: size; }
+    a.asset .a-get   { grid-area: get; align-self: center; }
+    .rel-date { margin-left: 0; width: 100%; order: 5; }
+    .chain { flex-wrap: wrap; gap: 14px; }
+    .cable { display: none; }
+    .stage { flex: 1 1 30%; width: auto; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .chain.hot .cable .pulse { animation: none; opacity: .5; }
+    .chain .stage, .chain .cable, .ring, .stage-value { transition: none; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#releases">Skip to downloads</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="OpenAY Mic home"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="#releases">Releases</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/issues" target="_blank" rel="noopener">Issues</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- hero -->
+  <section class="hero wrap">
+    <p class="eyebrow caps">Broadcast link · free · open source · MIT</p>
+    <h1>The phone is the <em>microphone</em>.</h1>
+    <p class="lede">
+      OpenAY Mic streams your Android phone's audio to the desktop as a
+      <strong>real, system-wide microphone</strong> — over Wi&#8209;Fi or USB,
+      raw PCM or Opus, with a measured <span class="mono">p50&nbsp;≈&nbsp;47&nbsp;ms</span>
+      end-to-end. No cloud in the path, ever.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-amber" href="#releases" id="dlTop">Download 0.3.0</a>
+      <a class="btn btn-ghost" href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+
+    <!-- the chain -->
+    <div class="chain-panel" aria-label="Product demo: the Chain">
+      <div class="chain-head">
+        <span class="title caps">The Chain</span>
+        <span class="note mono dim">SYNTHETIC SIGNAL — NOT YOUR MIC</span>
+        <label class="tone">
+          <input type="checkbox" id="tone" aria-describedby="tone-help">
+          <span class="tone-track"><span class="tone-knob"></span></span>
+          <span class="caps">Test tone</span>
+          <span id="tone-help" class="visually-hidden" style="position:absolute;left:-9999px;">Flips the demo from standby to on-air</span>
+        </label>
+      </div>
+
+      <div class="chain" id="chain">
+        <div class="stage" style="--i:0">
+          <span class="stage-label caps">Mic</span>
+          <div class="ring" aria-hidden="true"><i class="dot"></i></div>
+          <span class="stage-value" id="v-mic">STANDBY</span>
+        </div>
+        <div class="cable" style="--i:1" aria-hidden="true"><span class="pulse"></span></div>
+        <div class="stage" style="--i:2">
+          <span class="stage-label caps">Link</span>
+          <div style="height:46px;display:grid;place-items:center" aria-hidden="true">
+            <span class="mono dim" style="font-size:11px">480&nbsp;/s</span>
+          </div>
+          <span class="stage-value" id="v-link">— LOST —</span>
+        </div>
+        <div class="cable" style="--i:3" aria-hidden="true"><span class="pulse"></span></div>
+        <div class="stage" style="--i:4">
+          <span class="stage-label caps">Console</span>
+          <div style="height:46px;display:grid;place-items:center" aria-hidden="true">
+            <span class="mono dim" style="font-size:11px">10.0&nbsp;ms</span>
+          </div>
+          <span class="stage-value" id="v-con">JITTER — ms</span>
+        </div>
+      </div>
+
+      <div class="vu-row">
+        <div class="vu" id="vu" role="img" aria-label="Synthetic level meter, idle"></div>
+        <span class="vu-meta">VU&nbsp;PEAK&nbsp;<b id="vu-db">−∞ dB</b></span>
+      </div>
+    </div>
+
+    <p class="status" id="status" aria-live="polite">
+      <span>STANDBY</span><span>LAN ONLY</span><span>NO CLOUD</span><span>PROTOCOL v1 FROZEN</span>
+    </p>
+  </section>
+
+  <!-- patch list -->
+  <section class="block wrap" aria-labelledby="h-patch">
+    <div class="block-head"><h2 id="h-patch">Patch list</h2><span class="kicker">WHAT THE LINK DOES</span></div>
+    <ul class="patch">
+      <li>
+        <span class="p-label">Transport</span>
+        <span><span class="p-main">Wi-Fi or USB — pick per session.</span>
+        <span class="p-detail">UDP drops late packets instead of delaying them; TCP over adb never loses one. Bluetooth (SPP) is on the way.</span></span>
+      </li>
+      <li>
+        <span class="p-label">Codec</span>
+        <span><span class="p-main">Raw PCM or Opus at 10 ms frames.</span>
+        <span class="p-detail">16-bit LE mono 48 kHz, or OPUS_APPLICATION_RESTRICTED_LOWDELAY. The wire protocol is frozen at v1.</span></span>
+      </li>
+      <li>
+        <span class="p-label">Latency</span>
+        <span><span class="p-main">p50 ≈ 47 ms end-to-end, measured — not claimed.</span>
+        <span class="p-detail">Adaptive jitter: +2 ms per underrun to a 20 ms ceiling, −1 ms per quiet minute. ~0.5 %CPU with Opus active.</span></span>
+      </li>
+      <li>
+        <span class="p-label">Privacy</span>
+        <span><span class="p-main">Your audio never leaves the local network.</span>
+        <span class="p-detail">No cloud, no accounts, no telemetry. The receiver latches to the first peer it accepts and ignores the rest.</span></span>
+      </li>
+      <li>
+        <span class="p-label">Free</span>
+        <span><span class="p-main">MIT licensed. Downloads are free, forever.</span>
+        <span class="p-detail">Wire spec and golden test vectors are published in the repo. Fonts ship under the SIL OFL.</span></span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- setup -->
+  <section class="block wrap" aria-labelledby="h-setup">
+    <div class="block-head"><h2 id="h-setup">Setup</h2><span class="kicker">THREE STEPS, NO ROOT</span></div>
+    <ol class="steps">
+      <li><span class="step-num">01</span><b>Install the APK</b><p>Side-load the phone app and allow the microphone permission.</p></li>
+      <li><span class="step-num">02</span><b>Run the receiver</b><p>Start openay-gui on Linux or Windows and leave it listening on the LAN.</p></li>
+      <li><span class="step-num">03</span><b>Connect</b><p>Same Wi-Fi network, or plug in USB. Press ON AIR on the phone.</p></li>
+    </ol>
+  </section>
+
+  <!-- releases -->
+  <section class="block wrap" id="releases" aria-labelledby="h-rel">
+    <div class="block-head"><h2 id="h-rel">Releases</h2><span class="kicker" id="rel-count"></span></div>
+    <noscript><p class="dim">JavaScript is off — open the <a href="https://github.com/yadav-aryan18/openay-mic/releases" style="text-decoration:underline">GitHub releases page</a> to download.</p></noscript>
+    <div id="rel-list"></div>
+    <a class="more-link" href="https://github.com/yadav-aryan18/openay-mic/releases" target="_blank" rel="noopener">All releases on GitHub →</a>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <span class="brand" style="font-size:13px"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</span>
+    <span class="foot-note">MIT © 2026 Aryan Yadav · prototype page — downloads point at real GitHub release assets</span>
+    <div class="foot-links">
+      <a href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">Source</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/blob/main/shared/protocol.md" target="_blank" rel="noopener">Protocol spec</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/issues" target="_blank" rel="noopener">Report an issue</a>
+    </div>
+  </div>
+</footer>
+
+<script src="releases-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ----- the chain: power-on, then test tone ----- */
+  var chain = $("chain");
+  var boot = setTimeout(function () { chain.classList.add("powered"); }, reduced ? 0 : 300);
+  if (reduced) clearTimeout(boot);
+
+  var vu = $("vu"), SEGS = 24, segs = [];
+  for (var i = 0; i < SEGS; i++) { var s = document.createElement("i"); vu.appendChild(s); segs.push(s); }
+  var lvl = 0, raf = null, hot = false;
+
+  function paint(l) {
+    var lit = Math.round(l * SEGS);
+    for (var i = 0; i < SEGS; i++) {
+      segs[i].className = i < lit ? (i < 18 ? "s1" : i < 21 ? "s2" : "s3") : "";
+    }
+    $("vu-db").textContent = l <= 0.001 ? "−∞ dB" : (20 * Math.log10(l)).toFixed(0) + " dB";
+  }
+
+  function frame(t) {
+    var target = 0.5 + 0.34 * Math.abs(Math.sin(t / 850)) + Math.random() * 0.1;
+    lvl = Math.max(Math.min(target, 0.99), lvl - 0.008);
+    paint(lvl);
+    raf = requestAnimationFrame(frame);
+  }
+
+  // ?demo=1 arms the test tone automatically (for previews/screenshots)
+  if (new URLSearchParams(location.search).has("demo")) {
+    setTimeout(function () {
+      var t = $("tone");
+      if (!t.checked) { t.checked = true; t.dispatchEvent(new Event("change")); }
+    }, reduced ? 200 : 1100);
+  }
+
+  $("tone").addEventListener("change", function (e) {
+    hot = e.target.checked;
+    chain.classList.toggle("hot", hot);
+    if (hot) {
+      $("v-mic").textContent = "CAPTURE";
+      $("v-link").textContent = "480/s · 0 LOST";
+      $("v-con").textContent = "JITTER 10.0 ms";
+      $("status").innerHTML = '<span class="on">ON AIR · DEMO</span><span>UDP 480/s</span><span>OPUS 10 ms</span><span>JITTER 10.0 ms</span>';
+      vu.setAttribute("aria-label", "Synthetic level meter, demo signal running");
+      if (!raf) raf = requestAnimationFrame(frame);
+    } else {
+      $("v-mic").textContent = "STANDBY";
+      $("v-link").textContent = "— LOST —";
+      $("v-con").textContent = "JITTER — ms";
+      $("status").innerHTML = "<span>STANDBY</span><span>LAN ONLY</span><span>NO CLOUD</span><span>PROTOCOL v1 FROZEN</span>";
+      vu.setAttribute("aria-label", "Synthetic level meter, idle");
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      lvl = 0; paint(0);
+    }
+  });
+
+  /* ----- releases ----- */
+  var data = window.OPENAY_SITE;
+  if (!data) return;
+  var list = $("rel-list");
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
+  function assetsHtml(rel) {
+    return '<div class="assets">' + rel.assets.map(function (a) {
+      return '<a class="asset" href="' + esc(a.url) + '" download rel="noopener">' +
+        '<span class="a-label">' + esc(a.label) + '</span>' +
+        '<span class="a-name">' + esc(a.name) + '<span class="a-hint">' + esc(a.hint) + '</span></span>' +
+        '<span class="a-size">' + mb(a.size) + '</span>' +
+        '<span class="a-get">Get</span></a>';
+    }).join("") + "</div>";
+  }
+  function notesHtml(rel) {
+    if (!rel.notes) return "";
+    return '<details class="notes"><summary>What changed</summary><div class="notes-body">' +
+      rel.notes.map(function (g) {
+        return "<div><h3>" + esc(g.h) + "</h3><ul>" + g.items.map(function (it) { return "<li>" + esc(it) + "</li>"; }).join("") + "</ul></div>";
+      }).join("") + "</div></details>";
+  }
+  var latest = data.releases.filter(function (r) { return r.latest; })[0] || data.releases[0];
+  $("dlTop").textContent = "Download " + latest.tag.replace(/^v/, "");
+  list.innerHTML =
+    '<article class="release">' +
+      '<div class="rel-head"><span class="rel-ver">' + esc(latest.tag) + '</span>' +
+      '<span class="tag-latest">Latest</span>' +
+      '<time class="rel-date" datetime="' + esc(latest.date) + '">' + esc(latest.date) + '</time></div>' +
+      '<p class="rel-summary">' + esc(latest.summary) + "</p>" +
+      assetsHtml(latest) + notesHtml(latest) +
+    "</article>" +
+    data.releases.filter(function (r) { return r !== latest; }).map(function (r) {
+      return '<details class="release release-old">' +
+        '<summary><span class="chev" aria-hidden="true">+</span><span class="rel-ver" style="font-size:15px">' + esc(r.tag) + '</span>' +
+        '<span class="tag-arch">ARCHIVED</span>' +
+        '<time class="rel-date" datetime="' + esc(r.date) + '">' + esc(r.date) + '</time></summary>' +
+        '<div class="rel-body"><p class="rel-summary">' + esc(r.summary) + "</p>" + assetsHtml(r) + notesHtml(r) + "</div></details>";
+    }).join("");
+  $("rel-count").textContent = data.releases.length + " RELEASES · LAST BUILD " + data.snapshot;
+})();
+</script>
+</body>
+</html>

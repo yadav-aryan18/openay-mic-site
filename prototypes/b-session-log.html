@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenAY Mic — releases &amp; downloads</title>
+<meta name="description" content="Download every OpenAY Mic release: Android APK, Linux and Windows receivers. Free, MIT-licensed, served straight from GitHub Releases.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2314120F'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FFB454'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #14120F;
+    --panel:  #1E1B16;
+    --panel-hi:#232019;
+    --line:   #34302A;
+    --cream:  #EFE6D4;
+    --amber:  #FFB454;
+    --tally:  #E5484D;
+    --dim:    #8D8477;
+    --disp: "Chakra Petch", sans-serif;
+    --mono: "IBM Plex Mono", monospace;
+    --body: Roboto, system-ui, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--ink); color: var(--cream); font: 16px/1.65 var(--body); -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--amber); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 2px; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+  .caps { font-family: var(--disp); text-transform: uppercase; letter-spacing: .09em; }
+  .mono { font-family: var(--mono); }
+  .dim  { color: var(--dim); }
+
+  /* header */
+  .site-head { border-bottom: 1px solid var(--line); }
+  .site-head .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--disp); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 15px; }
+  .lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 12px rgba(255,180,84,.55); flex: none; }
+  .latest-chip { font-family: var(--mono); font-size: 11.5px; color: var(--dim); letter-spacing: .06em; border: 1px solid var(--line); border-radius: 2px; padding: 3px 9px; white-space: nowrap; }
+  .latest-chip b { color: var(--cream); font-weight: 500; }
+  .site-nav { margin-left: auto; display: flex; gap: 24px; font-family: var(--disp); font-weight: 500; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+  .site-nav a { color: var(--dim); }
+  .site-nav a:hover { color: var(--cream); }
+
+  /* hero — files first */
+  .hero { padding: clamp(36px, 6vw, 64px) 0 0; }
+  h1 { font-family: var(--disp); font-weight: 600; font-size: clamp(1.9rem, 4.6vw, 3rem); line-height: 1.08; letter-spacing: -.005em; }
+  .hero p.lede { margin-top: 14px; color: var(--dim); max-width: 62ch; font-size: 15.5px; }
+  .hero .lede strong { color: var(--cream); font-weight: 500; }
+
+  .qa-head { display: flex; align-items: center; gap: 14px; margin: 34px 0 14px; flex-wrap: wrap; }
+  .qa-head .caps { font-size: 12px; font-weight: 600; color: var(--cream); }
+  .qa-head .mono { font-size: 11.5px; color: var(--dim); letter-spacing: .05em; }
+  .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  a.qa {
+    border: 1px solid var(--line); border-radius: 2px; background: linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 100%);
+    padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 3px; min-height: 96px;
+    transition: border-color .16s, box-shadow .16s; position: relative;
+  }
+  a.qa:hover { border-color: var(--amber); box-shadow: 0 0 20px rgba(255,180,84,.12); }
+  .qa-label { font-family: var(--disp); font-weight: 600; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; }
+  .qa-name { font-family: var(--mono); font-size: 11px; color: var(--dim); word-break: break-all; }
+  .qa-meta { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; }
+  .qa-size { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+  .qa-get { font-family: var(--disp); font-weight: 600; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+  .qa-note { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .04em; }
+
+  .specline {
+    margin: 34px 0 0; padding: 12px 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12px; color: var(--dim); letter-spacing: .04em;
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+  }
+  .specline .on { color: var(--amber); }
+
+  /* ledger */
+  .ledger-head { display: flex; align-items: baseline; gap: 18px; border-bottom: 1px solid var(--line); padding: 54px 0 14px; }
+  .ledger-head h2 { font-family: var(--disp); font-weight: 600; font-size: 1.35rem; text-transform: uppercase; letter-spacing: .1em; }
+  .ledger-head .kicker { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .06em; }
+
+  .entry { display: grid; grid-template-columns: 120px 1fr; gap: 0 30px; border-bottom: 1px solid var(--line); padding: 26px 0; }
+  .rail { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .rail .tag { font-family: var(--mono); font-weight: 600; font-size: 14px; letter-spacing: .02em; }
+  .rail .st { display: flex; align-items: center; gap: 7px; font-family: var(--disp); font-weight: 500; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+  .rail .st i { width: 7px; height: 7px; border-radius: 50%; }
+  .st-current { color: var(--amber); } .st-current i { background: var(--amber); box-shadow: 0 0 8px rgba(255,180,84,.6); }
+  .st-archived { color: var(--dim); } .st-archived i { background: var(--line); }
+  .e-title { font-family: var(--disp); font-weight: 600; font-size: 15.5px; letter-spacing: .02em; }
+  .e-date { font-family: var(--mono); font-size: 12px; color: var(--dim); margin-left: 10px; }
+  .e-summary { margin-top: 8px; color: var(--dim); font-size: 14.5px; max-width: 74ch; }
+
+  .e-assets { margin-top: 16px; }
+  .e-assets a {
+    display: grid; grid-template-columns: 150px 1fr auto auto; gap: 16px; align-items: center;
+    padding: 11px 8px; border: 1px solid var(--line); border-bottom: 0; background: var(--panel);
+    transition: background-color .14s, border-color .14s;
+  }
+  .e-assets a:first-child { border-radius: 2px 2px 0 0; }
+  .e-assets a:last-child { border-bottom: 1px solid var(--line); border-radius: 0 0 2px 2px; }
+  .e-assets a:hover { background: var(--panel-hi); }
+  .ea-label { font-family: var(--disp); font-weight: 600; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  .ea-name { font-family: var(--mono); font-size: 12px; word-break: break-all; }
+  .ea-size { font-family: var(--mono); font-size: 12px; color: var(--dim); white-space: nowrap; }
+  .ea-get { font-family: var(--disp); font-weight: 600; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); border: 1px solid var(--line); border-radius: 2px; padding: 5px 10px; }
+
+  .e-notes { margin-top: 14px; }
+  .e-notes summary { cursor: pointer; list-style: none; display: inline-flex; gap: 10px; align-items: center; font-family: var(--disp); font-weight: 600; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  .e-notes summary::-webkit-details-marker { display: none; }
+  .e-notes summary::before { content: "+"; font-family: var(--mono); color: var(--amber); }
+  .e-notes[open] summary::before { content: "−"; }
+  .e-notes summary:hover { color: var(--cream); }
+  .e-notes .nb { padding: 16px 2px 2px; display: grid; gap: 14px; }
+  .e-notes h3 { font-family: var(--disp); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin-bottom: 7px; }
+  .e-notes ul { list-style: none; display: grid; gap: 6px; }
+  .e-notes li { font-size: 13.5px; padding-left: 18px; position: relative; }
+  .e-notes li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 1px; background: var(--dim); }
+
+  /* faq */
+  .faq { list-style: none; }
+  .faq li { display: grid; grid-template-columns: 300px 1fr; gap: 10px 30px; padding: 20px 2px; border-bottom: 1px solid var(--line); }
+  .faq li:last-child { border-bottom: 0; }
+  .faq .q { font-family: var(--disp); font-weight: 600; font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase; padding-top: 3px; }
+  .faq .a { color: var(--dim); font-size: 14.5px; }
+  .faq .a b { color: var(--cream); font-weight: 500; }
+  .faq .a .mono { font-size: .95em; }
+
+  /* footer */
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 30px 0 44px; }
+  .foot-row { display: flex; flex-wrap: wrap; gap: 14px 30px; align-items: center; }
+  .foot-note { font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+  .foot-links { margin-left: auto; display: flex; flex-wrap: wrap; gap: 22px; font-family: var(--disp); font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+  .foot-links a { color: var(--dim); }
+  .foot-links a:hover { color: var(--cream); }
+
+  @media (max-width: 860px) {
+    .quick { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 720px) {
+    .entry { grid-template-columns: 1fr; gap: 14px; }
+    .rail { flex-direction: row; align-items: center; }
+    .faq li { grid-template-columns: 1fr; }
+    .e-assets a { grid-template-columns: 1fr auto; grid-template-areas: "label get" "name get" "size get"; gap: 3px 12px; padding: 13px 8px; }
+    .e-assets a .ea-label { grid-area: label; }
+    .e-assets a .ea-name { grid-area: name; }
+    .e-assets a .ea-size { grid-area: size; }
+    .e-assets a .ea-get { grid-area: get; align-self: center; }
+  }
+  @media (max-width: 520px) {
+    .quick { grid-template-columns: 1fr; }
+    .latest-chip { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="OpenAY Mic home"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</a>
+    <span class="latest-chip mono" id="chip">LATEST <b>—</b></span>
+    <nav class="site-nav" aria-label="Site">
+      <a href="#log">Release log</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero wrap">
+    <h1>Every release. One page. Zero cost.</h1>
+    <p class="lede">
+      OpenAY Mic turns an Android phone into a <strong>real, system-wide microphone</strong> for
+      Linux and Windows. All builds below are free under the MIT license and served
+      straight from GitHub Releases — no accounts, no meters.
+    </p>
+
+    <div class="qa-head">
+      <span class="caps">Latest build</span>
+      <span class="mono" id="qa-meta">v0.3.0 · 2026-10-30</span>
+    </div>
+    <div class="quick" id="quick"></div>
+    <p class="qa-note">Side-load the APK on the phone; run the receiver on the desktop. No root anywhere.</p>
+
+    <p class="specline">
+      <span class="on">PROTOCOL v1 FROZEN</span><span>PCM 48 kHz / OPUS 10 ms</span><span>WI-FI UDP · USB TCP · BT SOON</span><span>p50 ≈ 47 ms MEASURED</span>
+    </p>
+  </section>
+
+  <section class="wrap" id="log" aria-labelledby="h-log">
+    <div class="ledger-head"><h2 id="h-log">Release log</h2><span class="kicker" id="log-count"></span></div>
+    <noscript><p class="dim" style="padding:20px 0">JavaScript is off — open the <a href="https://github.com/yadav-aryan18/openay-mic/releases" style="text-decoration:underline">GitHub releases page</a> to download.</p></noscript>
+    <div id="entries"></div>
+    <p style="padding:22px 2px"><a class="mono dim" href="https://github.com/yadav-aryan18/openay-mic/releases" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">All releases on GitHub →</a></p>
+  </section>
+
+  <section class="wrap" aria-labelledby="h-faq" style="padding-top:26px">
+    <div class="ledger-head" style="padding-top:0"><h2 id="h-faq">Before you download</h2><span class="kicker">QUICK ANSWERS</span></div>
+    <ul class="faq">
+      <li><span class="q">Is it really free?</span>
+        <span class="a"><b>Yes — MIT.</b> The files are hosted by GitHub Releases; this page only points at them. Nothing here is metered or gated.</span></li>
+      <li><span class="q">Does my phone need root?</span>
+        <span class="a">No. Everything runs in user space on both the phone and the desktop.</span></li>
+      <li><span class="q">Will Windows see it as a microphone?</span>
+        <span class="a">On Linux the receiver creates a PipeWire source — a system-wide mic every app can pick. On Windows it renders through WASAPI; pair it with a <b>virtual-audio-cable driver</b> (VB-Cable and friends) to expose it as a mic, the same way OBS does.</span></li>
+      <li><span class="q">Wi-Fi, USB or Bluetooth?</span>
+        <span class="a">Same Wi-Fi network for UDP, or a USB cable for TCP-over-adb (zero packet loss — the Windows build bundles adb). Bluetooth SPP is implemented and coming to a release soon.</span></li>
+      <li><span class="q">How current are these files?</span>
+        <span class="a">The list is baked from GitHub when the site deploys; the <span class="mono">repo's releases page</span> is always the source of truth. v0.1.0 ships a <span class="mono">SHA256SUMS.txt</span> — verify before you trust any binary.</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <span class="brand" style="font-size:13px"><span class="lamp" aria-hidden="true"></span>OpenAY&nbsp;Mic</span>
+    <span class="foot-note">MIT © 2026 Aryan Yadav · prototype page — downloads point at real GitHub release assets</span>
+    <div class="foot-links">
+      <a href="https://github.com/yadav-aryan18/openay-mic" target="_blank" rel="noopener">Source</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/blob/main/shared/protocol.md" target="_blank" rel="noopener">Protocol spec</a>
+      <a href="https://github.com/yadav-aryan18/openay-mic/issues" target="_blank" rel="noopener">Report an issue</a>
+    </div>
+  </div>
+</footer>
+
+<script src="releases-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var data = window.OPENAY_SITE;
+  if (!data) return;
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
+  var latest = data.releases.filter(function (r) { return r.latest; })[0] || data.releases[0];
+
+  document.getElementById("chip").innerHTML = "LATEST <b>" + esc(latest.tag) + "</b>";
+  document.getElementById("qa-meta").textContent = latest.tag + " · " + latest.date;
+
+  document.getElementById("quick").innerHTML = latest.assets.map(function (a) {
+    return '<a class="qa" href="' + esc(a.url) + '" download rel="noopener">' +
+      '<span class="qa-label">' + esc(a.label) + '</span>' +
+      '<span class="qa-name">' + esc(a.name) + '</span>' +
+      '<span class="qa-meta"><span class="qa-size">' + mb(a.size) + '</span><span class="qa-get">Get →</span></span></a>';
+  }).join("");
+
+  document.getElementById("log-count").textContent = data.releases.length + " ENTRIES · NEWEST FIRST";
+
+  function notesHtml(rel, openDefault) {
+    if (!rel.notes) return "";
+    return '<details class="e-notes"' + (openDefault ? " open" : "") + '><summary>What changed</summary><div class="nb">' +
+      rel.notes.map(function (g) {
+        return "<div><h3>" + esc(g.h) + "</h3><ul>" + g.items.map(function (it) { return "<li>" + esc(it) + "</li>"; }).join("") + "</ul></div>";
+      }).join("") + "</div></details>";
+  }
+
+  document.getElementById("entries").innerHTML = data.releases.map(function (r) {
+    var cur = r === latest;
+    return '<article class="entry">' +
+      '<div class="rail"><span class="tag">' + esc(r.tag) + '</span>' +
+      '<span class="st ' + (cur ? "st-current" : "st-archived") + '"><i aria-hidden="true"></i>' + (cur ? "Current" : "Archived") + "</span></div>" +
+      '<div><h3 class="e-title">' + esc(r.name) + '<time class="e-date" datetime="' + esc(r.date) + '">' + esc(r.date) + "</time></h3>" +
+      '<p class="e-summary">' + esc(r.summary) + "</p>" +
+      '<div class="e-assets">' + r.assets.map(function (a) {
+        return '<a href="' + esc(a.url) + '" download rel="noopener">' +
+          '<span class="ea-label">' + esc(a.label) + '</span>' +
+          '<span class="ea-name">' + esc(a.name) + '</span>' +
+          '<span class="ea-size">' + mb(a.size) + '</span>' +
+          '<span class="ea-get">Get</span></a>';
+      }).join("") + "</div>" +
+      notesHtml(r, cur) +
+      "</div></article>";
+  }).join("");
+})();
+</script>
+</body>
+</html>
