@@ -45,7 +45,17 @@ to GitHub's release pages.
     would go stale. When production bakes releases.json at deploy time they
     become accurate and can return.
   - The demo is labeled a **visual showpiece, not a screenshot**.
-  - Chain demo powers on when scrolled into view; stages stack on phones.
+  - **GitHub + Star buttons** in the topbar (footer keeps Source code too).
+    The star button opens the repo in a new tab — starring can only happen
+    on GitHub while logged in, so no site can star for you; the button says
+    so in its tooltip, fills the star after use, and remembers it.
+  - **No checksum rows** — the v0.1.0 asset names broke filename-based
+    labeling (two "Checksums" chips), and checksums only existed for v0.1.0;
+    anyone hashing can use the GitHub release page.
+  - Background: the angled spotlight beams are gone — one soft themed glow
+    at the top, coherent across themes.
+  - Chain demo powers on when scrolled into view; stages stack on phones
+    (probe-verified overflow fix).
 
 Open directly in a browser (no build step) or:
 
