@@ -31,6 +31,21 @@ to GitHub's release pages.
 - **`e-daylight.html`** — the daylight direction: same identity on warm
   paper, light cards with soft shadows, a signal-path diagram, ink buttons.
   Tests whether a light site suits the brand.
+- **`f-fusion.html`** — the synthesis direction (current favorite): A's
+  interactive TEST TONE demo inside D's app-window showpiece, C's bento and
+  download cards on D's clean minimal styling. Adds:
+  - **Theme switcher** — Light / Iced Amber (default) / AMOLED (pure black,
+    for OLED screens — black pixels are off, saving battery and giving
+    infinite contrast). Persisted in localStorage, applied before first
+    paint; `?theme=light` / `?theme=amoled` force a theme for sharing.
+  - **Downloads dropdown** in the navbar: three direct options
+    (Android APK / Windows / Linux) + link to all downloads.
+  - **Clean download labels** — "Android APK · v0.3.0", no raw filenames.
+    File sizes removed: the prototype's snapshot data is static, so sizes
+    would go stale. When production bakes releases.json at deploy time they
+    become accurate and can return.
+  - The demo is labeled a **visual showpiece, not a screenshot**.
+  - Chain demo powers on when scrolled into view; stages stack on phones.
 
 Open directly in a browser (no build step) or:
 
