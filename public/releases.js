@@ -5,10 +5,55 @@ window.OPENAY_SITE = {
   "releasesUrl": "https://github.com/yadav-aryan18/openay-mic/releases",
   "releases": [
     {
+      "tag": "v0.3.1",
+      "name": "0.3.1",
+      "date": "2026-10-31",
+      "latest": true,
+      "prerelease": false,
+      "summary": "- Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth,",
+      "notes": [
+        {
+          "h": "Fixed",
+          "items": [
+            "Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth,",
+            "Phone (voice FX): the platform noise suppressor (an untunable black box",
+            "Phone (loudness): added always-on capture-side level normalization —",
+            "Android GUI: fixed misalignment and disparate sizing of Chain stage cards"
+          ]
+        },
+        {
+          "h": "Added",
+          "items": [
+            "LISTEN (mic test) toggle: play your own received mic audio on a local"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "name": "openay-mic-0.3.1-linux-x86_64.tar.gz",
+          "label": "Linux",
+          "size": 6975636,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.1/openay-mic-0.3.1-linux-x86_64.tar.gz"
+        },
+        {
+          "name": "openay-mic-0.3.1-windows-x86_64.zip",
+          "label": "Windows",
+          "size": 7820093,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.1/openay-mic-0.3.1-windows-x86_64.zip"
+        },
+        {
+          "name": "openay-mic-debug.apk",
+          "label": "Android",
+          "size": 13847149,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.1/openay-mic-debug.apk"
+        }
+      ]
+    },
+    {
       "tag": "v0.3.0",
       "name": "OpenAY Mic 0.3.0",
       "date": "2026-10-30",
-      "latest": true,
+      "latest": false,
       "prerelease": false,
       "summary": "OpenAY Mic 0.3.0 — phone-as-microphone for Linux and Windows, with full Bluetooth SPP support.",
       "notes": [
