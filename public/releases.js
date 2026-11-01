@@ -5,10 +5,53 @@ window.OPENAY_SITE = {
   "releasesUrl": "https://github.com/yadav-aryan18/openay-mic/releases",
   "releases": [
     {
+      "tag": "v0.3.2",
+      "name": "0.3.2",
+      "date": "2026-11-01",
+      "latest": true,
+      "prerelease": false,
+      "summary": "- Clients: the OpenAY Mic logo across platforms — the GUI window and",
+      "notes": [
+        {
+          "h": "Added",
+          "items": [
+            "Clients: the OpenAY Mic logo across platforms — the GUI window and",
+            "Linux dist: install-desktop.sh — a per-user launcher + hicolor icon"
+          ]
+        },
+        {
+          "h": "Fixed",
+          "items": [
+            "Linux: the GUI announced an empty Wayland application id, so the dock"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "name": "openay-mic-0.3.2-linux-x86_64.tar.gz",
+          "label": "Linux",
+          "size": 6983756,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.2/openay-mic-0.3.2-linux-x86_64.tar.gz"
+        },
+        {
+          "name": "openay-mic-0.3.2-windows-x86_64.zip",
+          "label": "Windows",
+          "size": 7821236,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.2/openay-mic-0.3.2-windows-x86_64.zip"
+        },
+        {
+          "name": "openay-mic-debug.apk",
+          "label": "Android",
+          "size": 13884142,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.2/openay-mic-debug.apk"
+        }
+      ]
+    },
+    {
       "tag": "v0.3.1",
       "name": "0.3.1",
       "date": "2026-10-31",
-      "latest": true,
+      "latest": false,
       "prerelease": false,
       "summary": "- Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth,",
       "notes": [
