@@ -32,14 +32,29 @@ const label = (a) => {
 };
 
 const plain = (md) =>
-  md.replace(/\*\*/g, "").replace(/`/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+  md
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "") // images out
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // links → text
+    .replace(/\*\*/g, "")
+    .replace(/__/g, "")
+    .replace(/`/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
+// Release bodies hard-wrap bullets across continuation lines; a "line" is
+// not an item. Join indented continuations into the bullet they belong to.
 const firstParagraph = (body) => {
   if (!body) return "";
-  for (const line of body.split("\n")) {
-    const t = line.trim();
-    if (!t || t.startsWith("#") || t.startsWith("![") || t.startsWith("<")) continue;
+  let inFence = false;
+  for (const raw of body.split("\n")) {
+    const t = raw.trim();
+    if (/^(```|~~~)/.test(t)) { inFence = !inFence; continue; }
+    if (inFence || !t) continue;
+    if (t.startsWith("#") || t.startsWith("-") || t.startsWith("*") ||
+        t.startsWith(">") || t.startsWith("|") || t.startsWith("![") ||
+        /^\s/.test(raw) || /^\d+[.)]\s/.test(t)) continue; // headings, bullets, continuations
     const text = plain(t);
+    if (!text) continue;
     return text.length > 240 ? text.slice(0, 237).trimEnd() + "…" : text;
   }
   return "";
@@ -49,15 +64,37 @@ const sectionNotes = (body) => {
   if (!body) return [];
   const sections = [];
   let current = null;
-  for (const line of body.split("\n")) {
-    const h = line.match(/^#{2,3}\s+(.+?)\s*$/);
+  let inFence = false;
+  for (const raw of body.split("\n")) {
+    const t = raw.trim();
+    if (/^(```|~~~)/.test(t)) { inFence = !inFence; continue; }
+    if (inFence || !t) continue;
+    // Some release bodies append older versions' notes (Keep-a-Changelog
+    // style "## [0.3.0] - date"); everything from there belongs elsewhere.
+    if (/^#{1,3}\s*\[\s*v?\d/i.test(t)) break;
+    const h = t.match(/^#{1,6}\s+(.+?)\s*$/);
     if (h) { current = { h: h[1], items: [] }; sections.push(current); continue; }
-    const item = line.match(/^\s*[-*]\s+(.+?)\s*$/);
-    if (item && current && current.items.length < 8) {
-      current.items.push(plain(item[1]));
+    if (!current) continue;
+    const bullet = t.match(/^[-*]\s+(.+?)\s*$/);
+    if (bullet) {
+      if (current.items.length < 10) current.items.push(plain(bullet[1]));
+    } else if (/^\s/.test(raw) && current.items.length) {
+      // indented continuation of the previous (hard-wrapped) bullet
+      const i = current.items.length - 1;
+      current.items[i] = plain(current.items[i] + " " + t);
+    } else if (current.items.length < 10) {
+      current.items.push(plain(t)); // prose paragraph inside a section
     }
   }
   return sections.filter((s) => s.items.length).slice(0, 6);
+};
+
+// Bodies that open with headings/lists have no intro paragraph; fall back to
+// the first change item so cards don't show a truncated fragment.
+const fallbackSummary = (notes) => {
+  const first = (notes[0] && notes[0].items[0]) || "";
+  if (!first) return "";
+  return first.length > 200 ? first.slice(0, 197).trimEnd() + "…" : first;
 };
 
 const data = {
@@ -66,21 +103,24 @@ const data = {
   releasesUrl: `https://github.com/${REPO}/releases`,
   releases: releases
     .filter((r) => !r.draft) // drafts never exist publicly; prereleases are shown (project decision)
-    .map((r) => ({
-      tag: r.tag_name,
-      name: r.name || r.tag_name,
-      date: (r.published_at || r.created_at || "").slice(0, 10),
-      latest: false,
-      prerelease: !!r.prerelease,
-      summary: firstParagraph(r.body) || r.name || r.tag_name,
-      notes: sectionNotes(r.body),
-      assets: (r.assets || []).map((a) => ({
-        name: a.name,
-        label: label(a),
-        size: a.size,
-        url: `https://github.com/${REPO}/releases/download/${r.tag_name}/${a.name}`,
-      })),
-    })),
+    .map((r) => {
+      const notes = sectionNotes(r.body);
+      return {
+        tag: r.tag_name,
+        name: r.name || r.tag_name,
+        date: (r.published_at || r.created_at || "").slice(0, 10),
+        latest: false,
+        prerelease: !!r.prerelease,
+        summary: firstParagraph(r.body) || fallbackSummary(notes) || r.name || r.tag_name,
+        notes,
+        assets: (r.assets || []).map((a) => ({
+          name: a.name,
+          label: label(a),
+          size: a.size,
+          url: `https://github.com/${REPO}/releases/download/${r.tag_name}/${a.name}`,
+        })),
+      };
+    }),
 };
 if (data.releases[0]) data.releases[0].latest = true;
 

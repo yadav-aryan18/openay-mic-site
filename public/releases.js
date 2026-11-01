@@ -10,19 +10,19 @@ window.OPENAY_SITE = {
       "date": "2026-11-01",
       "latest": true,
       "prerelease": false,
-      "summary": "- Clients: the OpenAY Mic logo across platforms — the GUI window and",
+      "summary": "Clients: the OpenAY Mic logo across platforms — the GUI window and taskbar icon on Linux and Windows, the Windows executable icon (embedded at build time on MSVC hosts; cross builds skip it with a…",
       "notes": [
         {
           "h": "Added",
           "items": [
-            "Clients: the OpenAY Mic logo across platforms — the GUI window and",
-            "Linux dist: install-desktop.sh — a per-user launcher + hicolor icon"
+            "Clients: the OpenAY Mic logo across platforms — the GUI window and taskbar icon on Linux and Windows, the Windows executable icon (embedded at build time on MSVC hosts; cross builds skip it with a warning), and the Android adaptive launcher icon (the manifest previously declared no icon at all, so the app showed the system default).",
+            "Linux dist: install-desktop.sh — a per-user launcher + hicolor icon install (no root) so the dock, app grid, and file-manager launcher views show the logo; GNOME matches running windows to .desktop entries and ignores window icons."
           ]
         },
         {
           "h": "Fixed",
           "items": [
-            "Linux: the GUI announced an empty Wayland application id, so the dock"
+            "Linux: the GUI announced an empty Wayland application id, so the dock showed a generic gear icon even with the window icon set. It now announces openay-gui, matching the shipped .desktop entry (verified on the toplevel with WAYLAND_DEBUG)."
           ]
         }
       ],
@@ -53,21 +53,15 @@ window.OPENAY_SITE = {
       "date": "2026-10-31",
       "latest": false,
       "prerelease": false,
-      "summary": "- Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth,",
+      "summary": "Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth, worst in third-party apps. The PipeWire consumer ran with effectively zero steady-state slack (the graph quantum exceeded the 10…",
       "notes": [
         {
           "h": "Fixed",
           "items": [
-            "Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth,",
-            "Phone (voice FX): the platform noise suppressor (an untunable black box",
-            "Phone (loudness): added always-on capture-side level normalization —",
-            "Android GUI: fixed misalignment and disparate sizing of Chain stage cards"
-          ]
-        },
-        {
-          "h": "Added",
-          "items": [
-            "LISTEN (mic test) toggle: play your own received mic audio on a local"
+            "Desktop (virtual mic): mid-sentence dropouts on Wi-Fi and Bluetooth, worst in third-party apps. The PipeWire consumer ran with effectively zero steady-state slack (the graph quantum exceeded the 10-20 ms prebuffer range), so a single dry callback silenced the stream until it re-prebuffered. The prebuffer now starts at 40 ms (adaptive to 150 ms, +10 ms per underrun, -2 ms per 30 s clean window), the engine requests a 10 ms graph quantum by default (one wire frame per callback; OPENAY_NODE_LATENCY still overrides), and dry callbacks are concealed — the last sample is held with a fast decay and a short fade-in on recovery — instead of hard-cutting to zero. Only a sustained dry run (~50 ms) now counts as an underrun and re-prebuffers.",
+            "Phone (voice FX): the platform noise suppressor (an untunable black box on many devices) ducked word tails and distant speech hard enough to read as truncation. Voice FX now runs our own bounded cleanup in the native pipeline before encoding: a noise-floor gate that holds ~80 ms of quiet before ducking, never attenuates more than ~14 dB, and reopens fast enough that word onsets are not swallowed. Platform echo cancellation is unchanged.",
+            "Phone (loudness): added always-on capture-side level normalization — speech is pulled toward -20 dBFS RMS (up to ~+21 dB for a desk-distant phone, down for close talk), frozen while the gate is closed, with a per-frame peak limiter. Unity receiver gain is now audible without holding the phone near the mouth.",
+            "Android GUI: fixed misalignment and disparate sizing of Chain stage cards (MIC, LINK, CONSOLE). Cards now share an equal-height body footprint (STAGE_BODY_HEIGHT = 56.dp) and IntrinsicSize.Max row constraints with centered content, ensuring uniform dimensions, aligned borders, and clean cable connectors across all three tiles (matching desktop STAGE_BODY_HEIGHT architecture)."
           ]
         }
       ],
@@ -127,7 +121,8 @@ window.OPENAY_SITE = {
           "items": [
             "openay-mic-0.3.0-windows-x86_64.zip — Windows GUI + server + bundled adb (extract and run; see README-WINDOWS.txt inside).",
             "openay-mic-0.3.0-android.apk — Android client (Wi-Fi + USB).",
-            "openay-mic-0.3.0-android-bluetooth.apk — Android client with the Bluetooth transport enabled."
+            "openay-mic-0.3.0-android-bluetooth.apk — Android client with the Bluetooth transport enabled.",
+            "Wire protocol remains v1-compatible; see shared/protocol.md for the CONTROL vocabulary."
           ]
         }
       ],
@@ -204,7 +199,8 @@ window.OPENAY_SITE = {
           "h": "Notes",
           "items": [
             "The Bluetooth (RFCOMM/SPP) transport is implemented on the feature/bluetooth branch (desktop BlueZ SPP service + phone client + host tests) and merges after on-hardware validation.",
-            "Wire protocol v1 is frozen; releases are additive receiver-side only."
+            "Wire protocol v1 is frozen; releases are additive receiver-side only.",
+            "Full changelog: CHANGELOG.md"
           ]
         }
       ],
@@ -232,22 +228,69 @@ window.OPENAY_SITE = {
       "summary": "This is the first public prototype of OpenAY Mic: an ultra-low-latency",
       "notes": [
         {
+          "h": "OpenAY Mic v0.1.0 — first prototype release",
+          "items": [
+            "This is the first public prototype of OpenAY Mic: an ultra-low-latency",
+            "virtual microphone. Your Android phone captures audio and streams it to a",
+            "Linux desktop, where it appears as a native PipeWire source — a real",
+            "microphone that every application (OBS, Zoom, browsers, DAWs…) can use.",
+            "It is pre-1.0 software: expect rough edges, and the wire protocol may still",
+            "change."
+          ]
+        },
+        {
+          "h": "Downloads",
+          "items": [
+            "| File | For |",
+            "|---|---|",
+            "| openay-mic-v0.1.0-x86_64-linux-gnu.tar.gz | Linux desktop (x86_64) — GUI console + headless server + tools |",
+            "| openay-mic-v0.1.0-debug.apk | Android phone or emulator (arm64 / x86_64) |",
+            "Verify with SHA256SUMS.txt."
+          ]
+        },
+        {
+          "h": "Requirements",
+          "items": [
+            "Desktop: Linux x86_64 with PipeWire (any recent distro has it — built",
+            "and tested against PipeWire 1.0.5, Ubuntu 24.04 / glibc 2.39). libopus",
+            "and libpipewire-0.3 are resolved from your system at runtime; no",
+            "installation steps beyond unpacking.",
+            "Phone: Android 8.0+ (arm64-v8a; an x86_64 emulator build is included).",
+            "The APK is debug-signed — fine for a prototype, will be release-signed in a",
+            "later version."
+          ]
+        },
+        {
+          "h": "Quick start",
+          "items": [
+            "Desktop:",
+            "The server/GUI listens on UDP/TCP (default port 41700). Over USB, forward",
+            "with adb forward tcp:41700 tcp:41700; from an emulator the host is",
+            "reachable as 10.0.2.2.",
+            "Phone: install the APK, open OpenAY Mic, pick transport (Wi-Fi/USB",
+            "TCP/Bluetooth), host + port, codec (PCM or Opus low-delay), then hit",
+            "ON AIR. The desktop appears as the source openay_mic in PipeWire —",
+            "record from it with pw-cat --record --target openay_mic out.wav or pick",
+            "\"OpenAY Mic\" in any app."
+          ]
+        },
+        {
           "h": "What works (verified)",
           "items": [
-            "Wire protocol v1 (6-byte header, seq + length, big-endian) with golden",
-            "Transports: UDP (Wi-Fi, drop-late policy), TCP (USB via adb), Bluetooth",
-            "Android: Oboe low-latency capture, lock-free SPSC ring into the network",
-            "Desktop: PipeWire virtual source, sample-granular jitter buffer with an",
-            "QA: 141 Rust tests, 5 native C++ suites, cross-language interop gate,"
+            "Wire protocol v1 (6-byte header, seq + length, big-endian) with golden test vectors shared between the C++ and Rust implementations",
+            "Transports: UDP (Wi-Fi, drop-late policy), TCP (USB via adb), Bluetooth RFCOMM/SPP; Opus restricted-low-delay 10 ms or raw PCM 48 kHz mono",
+            "Android: Oboe low-latency capture, lock-free SPSC ring into the network thread, foreground service, Compose UI with live level metering",
+            "Desktop: PipeWire virtual source, sample-granular jitter buffer with an adaptive depth controller (raises on underrun, decays back), lossy network proxy for reproducible degradation testing, Iced GUI console",
+            "QA: 141 Rust tests, 5 native C++ suites, cross-language interop gate, software latency probe (p50 ≈ 39–50 ms glass-to-glass software path), CPU budgets asserted (idle < 1 %, Opus-active < 3 %)"
           ]
         },
         {
           "h": "Known limitations",
           "items": [
-            "Prototype quality: no authentication/encryption on the wire yet — use it",
+            "Prototype quality: no authentication/encryption on the wire yet — use it on trusted networks only",
             "Bluetooth transport is the least exercised path",
-            "APK is debug-signed; desktop binaries are built on Ubuntu 24.04 (glibc",
-            "Hardware glass-to-glass latency audit is documented but pending as a"
+            "APK is debug-signed; desktop binaries are built on Ubuntu 24.04 (glibc 2.39 floor)",
+            "Hardware glass-to-glass latency audit is documented but pending as a formal run"
           ]
         }
       ],
