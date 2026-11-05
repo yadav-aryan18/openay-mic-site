@@ -5,10 +5,35 @@ window.OPENAY_SITE = {
   "releasesUrl": "https://github.com/yadav-aryan18/openay-mic/releases",
   "releases": [
     {
+      "tag": "v0.3.3",
+      "name": "OpenAY Mic 0.3.3",
+      "date": "2026-11-05",
+      "latest": true,
+      "prerelease": false,
+      "summary": "Packaging release: opus is vendored in-repo as a git submodule (xiph/opus pinned to v1.5.2, BSD-3-Clause) so the Android build is fully offline-capable — required for F-Droid inclusion. The compiled codec is identical to 0.3.2 (same tag)…",
+      "notes": [
+        {
+          "h": "Packaging",
+          "items": [
+            "opus submodule replaces the build-time FetchContent download",
+            "versionCode 5"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "name": "openay-mic-0.3.3-android.apk",
+          "label": "Android",
+          "size": 13882794,
+          "url": "https://github.com/yadav-aryan18/openay-mic/releases/download/v0.3.3/openay-mic-0.3.3-android.apk"
+        }
+      ]
+    },
+    {
       "tag": "v0.3.2",
       "name": "0.3.2",
       "date": "2026-11-01",
-      "latest": true,
+      "latest": false,
       "prerelease": false,
       "summary": "Clients: the OpenAY Mic logo across platforms — the GUI window and taskbar icon on Linux and Windows, the Windows executable icon (embedded at build time on MSVC hosts; cross builds skip it with a…",
       "notes": [
